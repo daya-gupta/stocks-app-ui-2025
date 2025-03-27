@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+// import Image from "next/image";
+// import styles from "./page.module.css";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Header from "./header/page";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +28,41 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <Header />
+        <div style={{margin: '16px 5%', width: '90%'}}>
+          {children}
+        </div>
+        {/* <footer className={styles.footer}>
+          <a
+            href="contact"
+            // target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              aria-hidden
+              src="/file.svg"
+              alt="File icon"
+              width={16}
+              height={16}
+            />
+            Contact Us
+          </a>
+          <a
+            href="https://www.youtube.com/@investingwithdayanand"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Image
+              aria-hidden
+              src="/window.svg"
+              alt="Window icon"
+              width={16}
+              height={16}
+            />
+            YouTube
+          </a>
+        </footer> */}
+
       </body>
     </html>
   );

@@ -1,0 +1,239 @@
+"use client";
+import { useRef, useEffect, useState } from "react";
+import { createChart, CandlestickSeries, HistogramSeries } from 'lightweight-charts';
+// import historicalData from '../json/Mock_historical_data2.js';
+import { GLOBAL_LIST } from "./utils/constants";
+
+// const chartData = (historicalData[0]?.data?.data?.candles || []).reverse();
+// console.log('.....', chartData, chartData);
+// const ohlcData = [];
+// const volumeData = [];
+// chartData.forEach((item, index) => {
+//   ohlcData.push({
+//     open: item[1],
+//     high: item[2],
+//     low: item[3],
+//     close: item[4],
+//     time: +(new Date(item[0]))
+//   });
+//   volumeData.push({
+//     value: item[5],
+//     time: +(new Date(item[0]))
+//   });
+// });
+// console.log(ohlcData, '....', volumeData);
+const chartProperties = {
+  width: 1200,
+  height: 500,
+  timeScale: {
+    timeVisible: true,
+    secondsVisible: true,
+  },
+  pane: 0,
+};
+
+const instruments = [
+  // "NSE_INDEX%7CNifty%2050",
+  "NSE_EQ%7CINE752E01010"
+];
+
+const intervalOptions = [
+  { label: '1 minute', value: '1minute' },
+  { label: '30 minute', value: '30minute' },
+  { label: '1 day', value: 'day' },
+  { label: '1 week', value: 'week' },
+];
+
+function Chart() {
+  const [name, setName] = useState('');
+  const chartRef = useRef(null);
+  const [interval, setInterval] = useState('day');
+
+  const fetchData = (series, vSeries) => {
+    // make an api call to fetch data
+    const deliveryPayload = {
+      filter: {
+        instruments,
+        interval: 'day',
+        from_date: '2024-11-12',
+        // "to_date": "2025-03-03"
+        to_date: new Date().toISOString().split('T')[0]
+      }
+    }
+    const intradayPayload = {
+      filter: {
+        instruments,
+        interval: '30minute',
+      }
+    }
+    const promiseArray = [];
+
+    const deliveryReq = fetch('http://localhost:3000/historicalDataUpstox', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(deliveryPayload)
+    });
+
+    const intradayReq = fetch('http://localhost:3000/intradayData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(intradayPayload)
+    });
+
+    promiseArray.push(intradayReq);
+    promiseArray.push(deliveryReq);
+
+    Promise.all(promiseArray)
+      // .then(response => response.json())
+      .then((response) => {
+        return Promise.all(response.map((res) => res.json()));
+      })
+      .then(([intradayData, deliveryData]) => {
+        const ohlcData = [];
+        const volumeData = [];
+        let name = '';
+        let combinedData = [];
+        if (deliveryData) {
+          combinedData = [...deliveryData];
+          combinedData.unshift(intradayData[0]);
+        } else {
+          combinedData = [...intradayData];
+        }
+        combinedData.forEach((item) => {
+          const instrumentDetails = GLOBAL_LIST[item.instrument] || {};
+          name = instrumentDetails.name || item.instrument;
+          item.candles.reverse().forEach((candle) => {
+            ohlcData.push({
+              open: candle[1],
+              high: candle[2],
+              low: candle[3],
+              close: candle[4],
+              time: +(new Date(candle[0])) / 1000
+            });
+            volumeData.push({
+              value: candle[5],
+              time: +(new Date(candle[0])) / 1000
+            });
+          });
+        })
+        series.setData(ohlcData);
+        vSeries.setData(volumeData)
+        setName(name);
+      })
+      .catch(error => console.error(error));
+  }
+
+  // const volumeSeries = chart.addSeries(HistogramSeries, {
+  //     priceFormat: {
+  //       type: 'volume',
+  //     },
+  //     priceScaleId: '', // set as an overlay by setting a blank priceScaleId
+  //   });
+
+  const changeInterval = (index) => {
+    setInterval(intervalOptions[index].value);
+  }
+
+  useEffect(() => {
+    const chart = createChart(chartRef.current, chartProperties);
+    // const priceSeries = chart.addCandlestickSeries({});
+    const priceSeries = chart.addSeries(CandlestickSeries);
+    const volumeSeries = chart.addSeries(HistogramSeries, {
+      priceFormat: {
+        type: 'volume',
+      },
+      priceScaleId: '', // set as an overlay by setting a blank priceScaleId
+      // color: 'blue',
+      // lineWidth: 1,
+      // pane: 2,
+      // height: 50
+    });
+
+    volumeSeries.priceScale().applyOptions({
+      scaleMargins: {
+        top: 0.8, // highest point of the series will be 70% away from the top
+        bottom: 0, // lowest point will be at the very bottom.
+      },
+    });
+
+
+    // const priceSeriesData = [
+    //   { time: '2019-04-11', value: 80.01 },
+    //   { time: '2019-04-12', value: 96.63 },
+    //   { time: '2019-04-13', value: 76.64 },
+    //   { time: '2019-04-14', value: 81.89 },
+    //   { time: '2019-04-15', value: 74.43 },
+    //   { time: '2019-04-16', value: 80.01 },
+    //   { time: '2019-04-17', value: 96.63 },
+    //   { time: '2019-04-18', value: 76.64 },
+    //   { time: '2019-04-19', value: 81.89 },
+    //   { time: '2019-04-20', value: 74.43 },
+    // ];
+    // const ohlcData = [
+    //   { time: '2019-04-11', open: 80.01, high: 82.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-12', open: 85.01, high: 86.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-13', open: 80.01, high: 86.0, low: 78.5, close: 84.5 },
+    //   { time: '2019-04-14', open: 80.01, high: 83.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-15', open: 80.01, high: 82.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-16', open: 81.01, high: 82.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-17', open: 80.01, high: 85.0, low: 78.5, close: 80.5 },
+    //   { time: '2019-04-18', open: 80.01, high: 82.0, low: 70.5, close: 80.5 },
+    //   { time: '2019-04-19', open: 80.01, high: 82.0, low: 78.5, close: 81.5 },
+    //   { time: '2019-04-20', open: 85.01, high: 86.0, low: 78.5, close: 80.5 },
+    // ];
+
+    fetchData(priceSeries, volumeSeries);
+
+    // priceSeries.setData(ohlcData);
+    // const volumeSeries = chart.addHistogramSeries({
+    //   color: 'blue',
+    //   // lineWidth: 1,
+    //   pane: 2,
+    //   height: 50
+    // });
+    // volumeSeries.setData(volumeData);
+  }, [])
+
+  const renderIntervals = () => {
+    // return {
+    //   intervalOptions.map((item, index) => {
+    //     <button className={ item.value === interval ? 'active' : '' } onClick={() => changeInterval(index)}>{item.label}</button>
+    //   })
+    // }
+  }
+
+  const testRender = () => {
+    return (
+      <h1>I am good</h1>
+    );
+  }
+  return (
+    <div>
+      {/* { testRender() } */}
+      <h2>Nav</h2>
+      <h1>{name}</h1>
+      {/* { this.renderIntervals() } */}
+      <div ref={chartRef}></div>
+      {/* // className="flex h-screen items-center justify-center" */}
+      {/* Working like anything... */}
+      {/* <div className="flex flex-col items-center gap-16">
+        <header className="flex flex-col items-center gap-9">
+          <h1 className="leading text-2xl font-bold text-gray-800 dark:text-gray-100">
+            Welcome to <span className="sr-only">Remix</span>
+          </h1>
+        </header>
+        <nav className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-gray-200 p-6 dark:border-gray-700">
+          <p className="leading-6 text-gray-700 dark:text-gray-200">
+            What&apos;s next?
+          </p>
+        </nav>
+      </div> */}
+    </div>
+  );
+}
+
+export default Chart;

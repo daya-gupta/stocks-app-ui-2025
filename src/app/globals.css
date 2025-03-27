@@ -24,6 +24,20 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 0.5rem;
+  text-align: left;
+  border: 1px solid #aaa;
+  &.numeric {
+    text-align: right;
+  }
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -39,4 +53,64 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+.pull-right {
+  float: right;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.green {
+  background-color: #70c970;
+}
+
+.red {
+  background-color: #f75353;
+}
+
+.header {
+  display: flex;
+  /* padding: 20px; */
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.logo {
+  /* flex-basis: 180px; */
+  background: #52a9ff;
+  padding: 6px 20px;
+}
+
+.nav {
+  flex-grow: 1;
+  padding: 22px 22px 22px 50px;
+}
+
+.nav-item {
+  padding: 28px;
+}
+
+a.nav-item:hover {
+  opacity: .5;
+}
+
+.profile {
+  /* flex-basis: 100px; */
+  padding: 6px 20px;
+}
+
+button.active {
+  font-weight: bold;
+  background-color: #fff;
+}
+
+.chart-intervals button {
+  padding: 6px 10px;
+}
+
+.chart-sma-options button {
+  padding: 6px 10px;
 }
