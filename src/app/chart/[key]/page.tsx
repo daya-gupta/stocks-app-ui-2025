@@ -2,7 +2,7 @@
 import { useParams } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { createChart, CandlestickSeries, HistogramSeries, LineSeries, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
-import { GLOBAL_LIST, intervalOptions, smaOptions } from "../../utils/constants";
+import { baseUrl, GLOBAL_LIST, intervalOptions, smaOptions } from "../../utils/constants";
 // import Link from "next/link";
 import { sma } from 'indicatorts';
 import moment from "moment";
@@ -79,7 +79,7 @@ const Chart = () => {
         }
         const promiseArray = [];
 
-        const intradayReq = fetch('http://localhost:3000/intradayData', {
+        const intradayReq = fetch(`${baseUrl}/historicalDataUpstox`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -90,7 +90,7 @@ const Chart = () => {
         promiseArray.push(intradayReq);
 
         if (interval !== '1minute' && interval !== '30minute') {
-            const deliveryReq = fetch('http://localhost:3000/historicalDataUpstox', {
+            const deliveryReq = fetch(`${baseUrl}/historicalDataUpstox`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

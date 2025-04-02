@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
-import { GLOBAL_LIST } from "./utils/constants";
+import { baseUrl, GLOBAL_LIST, instruments } from "./utils/constants";
 import { CandleType } from "./utils/types";
+import Sort from "./sort";
 
-const baseUrl = 'http://localhost:3000';
+export const BASE_URL = `${process.env.API_URL}:${process.env.PORT}`;
+console.log(BASE_URL);
 
 const defaultAverageReturns = {
     dayChange1: 0,
@@ -16,38 +18,9 @@ const defaultAverageReturns = {
     monthChange3: 0,
     monthChange6: 0,
     yearChange1: 0,
+    yearChange2: 0,
+    yearChange3: 0,
 };
-
-const instruments = [
-    "NSE_EQ%7CINE848E01016",
-    "NSE_EQ%7CINE752E01010",
-    "NSE_EQ%7CINE251B01027",
-    "NSE_EQ%7CINE613B01010",
-    "NSE_EQ%7CINE138Y01010",
-    "NSE_EQ%7CINE596I01012",
-    "NSE_EQ%7CINE457L01029",
-    "NSE_EQ%7CINE481N01025", //home first
-    "NSE_EQ%7CINE542W01025",
-    "NSE_EQ%7CINE00VM01036",
-    "NSE_EQ%7CINE200M01039", //VBL
-    "NSE_EQ%7CINE04I401011", //KPIT
-    "NSE_EQ%7CINE475E01026", //caplin-point
-    "BSE_EQ%7CINE024F01011", //shilchar
-    "NSE_EQ%7CINE731H01025", //ACE
-    "NSE_EQ%7CINE07K301024", //Zaggle
-    "BSE_EQ%7CINE015C01016", //Tinna Rubber
-    "NSE_EQ%7CINE00F201020", //prudent
-    "NSE_EQ%7CINE439E01022", //skipper
-    "NSE_EQ%7CINE01IU01018", //sky gold
-    // "NSE_EQ%7CINE953R01016", //png jewellers
-    "NSE_EQ%7CINE463V01026", // anand rathi
-    "NSE_EQ%7CINE043W01024", //vijaya diagnostics
-    "NSE_EQ%7CINE152M01016", // triveni turbine
-
-    "NSE_INDEX%7CNifty%2050",
-    // "NSE_INDEX%7CNifty%20Smallcap%20250",
-    // "NSE_INDEX%7CINEB000B0Z12",
-];
 
 interface CandleResponseType {
     instrument: string;
@@ -65,6 +38,8 @@ interface FormattedCandleType {
     monthChange3: number,
     monthChange6: number,
     yearChange1: number,
+    yearChange2: number,
+    yearChange3: number,
 }
 
 type averageReturnType = {
@@ -75,6 +50,8 @@ type averageReturnType = {
     monthChange3: number,
     monthChange6: number,
     yearChange1: number,
+    yearChange2: number,
+    yearChange3: number,
 };
 
 const getIndex = (data: [CandleType], quantity: number, unit: string) => {
@@ -85,7 +62,7 @@ const getIndex = (data: [CandleType], quantity: number, unit: string) => {
     return index;
 }
 
-const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {formattedData: FormattedCandleType[], averageReturns: averageReturnType, benchmarkData: FormattedCandleType[]} => {
+const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): { formattedData: FormattedCandleType[], averageReturns: averageReturnType, benchmarkData: FormattedCandleType[] } => {
     const formattedData: FormattedCandleType[] = [];
     dData.forEach((item, index) => {
         const instrumentDetails = GLOBAL_LIST[item.instrument] || {};
@@ -105,6 +82,8 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
         const monthPrice3 = item.candles[getIndex(item.candles, 3, 'months')]?.[4];
         const monthPrice6 = item.candles[getIndex(item.candles, 6, 'months')]?.[4];
         const yearPrice1 = item.candles[getIndex(item.candles, 1, 'year')]?.[4];
+        const yearPrice2 = item.candles[getIndex(item.candles, 2, 'year')]?.[4];
+        const yearPrice3 = item.candles[getIndex(item.candles, 3, 'year')]?.[4];
 
         formattedData.push({
             instrument: item.instrument,
@@ -116,7 +95,9 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
             monthChange1: +((price - monthPrice1) / monthPrice1 * 100).toFixed(1),
             monthChange3: +((price - monthPrice3) / monthPrice3 * 100).toFixed(1),
             monthChange6: +((price - monthPrice6) / monthPrice6 * 100).toFixed(1),
-            yearChange1: +((price - yearPrice1) / monthPrice1 * 100).toFixed(1),
+            yearChange1: +((price - yearPrice1) / yearPrice1 * 100).toFixed(1),
+            yearChange2: +((price - yearPrice2) / yearPrice2 * 100).toFixed(1),
+            yearChange3: +((price - yearPrice3) / yearPrice3 * 100).toFixed(1),
         });
     });
     const benchmarkData: FormattedCandleType[] = [];
@@ -133,16 +114,20 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
         monthChange3: 0,
         monthChange6: 0,
         yearChange1: 0,
+        yearChange2: 0,
+        yearChange3: 0,
     };
     const averageReturns = { ...defaultAverageReturns };
     formattedData.forEach((item) => {
         toalReturns.dayChange1 = toalReturns.dayChange1 + Number(item.dayChange1);
-        toalReturns.weekChange1 = toalReturns.weekChange1 + Number(item.weekChange1);
-        toalReturns.weekChange2 = toalReturns.weekChange2 + Number(item.weekChange2);
-        toalReturns.monthChange1 = toalReturns.monthChange1 + Number(item.monthChange1);
-        toalReturns.monthChange3 = toalReturns.monthChange3 + Number(item.monthChange3) || 0;
-        toalReturns.monthChange6 = toalReturns.monthChange6 + Number(item.monthChange6) || 0;
-        toalReturns.yearChange1 = toalReturns.yearChange1 + Number(item.yearChange1) || 0;
+        toalReturns.weekChange1 = toalReturns.weekChange1 + (Number(item.weekChange1) || 0);
+        toalReturns.weekChange2 = toalReturns.weekChange2 + (Number(item.weekChange2) || 0);
+        toalReturns.monthChange1 = toalReturns.monthChange1 + (Number(item.monthChange1) || 0);
+        toalReturns.monthChange3 = toalReturns.monthChange3 + (Number(item.monthChange3) || 0);
+        toalReturns.monthChange6 = toalReturns.monthChange6 + (Number(item.monthChange6) || 0);
+        toalReturns.yearChange1 = toalReturns.yearChange1 + (Number(item.yearChange1) || 0);
+        toalReturns.yearChange2 = toalReturns.yearChange2 + (Number(item.yearChange2) || 0);
+        toalReturns.yearChange3 = toalReturns.yearChange3 + (Number(item.yearChange3) || 0);
     });
     averageReturns.dayChange1 = +(toalReturns.dayChange1 / formattedData.length).toFixed(1);
     averageReturns.weekChange1 = +(toalReturns.weekChange1 / formattedData.length).toFixed(1);
@@ -151,6 +136,8 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
     averageReturns.monthChange3 = +(toalReturns.monthChange3 / formattedData.length).toFixed(1);
     averageReturns.monthChange6 = +(toalReturns.monthChange6 / formattedData.length).toFixed(1);
     averageReturns.yearChange1 = +(toalReturns.yearChange1 / formattedData.length).toFixed(1);
+    averageReturns.yearChange2 = +(toalReturns.yearChange2 / formattedData.length).toFixed(1);
+    averageReturns.yearChange3 = +(toalReturns.yearChange3 / formattedData.length).toFixed(1);
     return { formattedData, averageReturns, benchmarkData };
 }
 
@@ -171,7 +158,7 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
 
 const Portfolio = () => {
     const [data, setData] = useState<Array<FormattedCandleType>>([]);
-    const [averageReturns, setAverageReturns] = useState<averageReturnType>({...defaultAverageReturns});
+    const [averageReturns, setAverageReturns] = useState<averageReturnType>({ ...defaultAverageReturns });
     const [indexReturns, setIndexReturns] = useState<FormattedCandleType[]>([]);
 
     const fetchData = () => {
@@ -179,7 +166,7 @@ const Portfolio = () => {
             filter: {
                 instruments,
                 interval: 'day',
-                from_date: '2024-03-01',
+                from_date: '2022-03-01',
                 // "to_date": "2025-03-06"
                 to_date: new Date().toISOString().split('T')[0]
             }
@@ -270,16 +257,49 @@ const Portfolio = () => {
         const color = value > 0 ? '0, 255, 0' : '255, 0, 0';
         const absValue = Math.ceil(Math.abs(value));
         let code;
-        switch(absValue) {
+        switch (absValue) {
             case 0: code = 0; break;
             case 1: code = 1; break;
             case 2: code = 2; break;
             case 3: code = 3; break;
-            default: code = 4 
+            default: code = 4
         }
         console.log(value, code);
         return { backgroundColor: `rgba(${color},${colorCodes[code]})` }
     }
+
+    const [sort, setSort] = useState({ sortBy: '', sortOrder: 1 })
+
+    const handleSortChange = (sortBy: keyof FormattedCandleType, sortOrder: number) => {
+        setSort({ sortBy, sortOrder });
+        let sortedData: FormattedCandleType[] = [];
+        if (sortBy !== 'name') {
+            sortedData = data.sort((a: FormattedCandleType, b: FormattedCandleType) => {
+                console.log(a[sortBy], b[sortBy]);
+                return sortOrder === 1 ? Number(a[sortBy]) - Number(b[sortBy]) : Number(b[sortBy]) - Number(a[sortBy]);
+            })
+        } else {
+            sortedData = data.sort((a: FormattedCandleType, b: FormattedCandleType) => {
+                return sortOrder === 1 ? (a.name < b.name ? 1 : -1) : (a.name > b.name ? 1 : -1);
+            })
+        }
+        setData(sortedData);
+    }
+
+    const headers = [
+        { title: 'Name', key: 'name', className: '' },
+        { title: 'Price', key: 'price', className: 'numeric' },
+        { title: '1 Day', key: 'dayChange1', className: 'numeric' },
+        { title: '1 Week', key: 'weekChange1', className: 'numeric' },
+        { title: '2 Week', key: 'weekChange2', className: 'numeric' },
+        { title: '1 Month', key: 'monthChange1', className: 'numeric' },
+        { title: '3 Month', key: 'monthChange3', className: 'numeric' },
+        { title: '6 Month', key: 'monthChange6', className: 'numeric' },
+        { title: '1 Year', key: 'yearChange1', className: 'numeric' },
+        { title: '2 Year', key: 'yearChange2', className: 'numeric' },
+        { title: '3 Year', key: 'yearChange3', className: 'numeric' },
+    ];
+
     return (
         <div>
             <h1>Model Portfolio - Growth 30</h1>
@@ -287,15 +307,31 @@ const Portfolio = () => {
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th className="numeric">Price</th>
-                        <th className="numeric">1 Day</th>
+                        {/* <th>Name</th>
+                        <th className="numeric">
+                            Price
+                            <Sort sortOrder={sort.sortBy === 'price' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('price', sortOrder)} />
+                        </th>
+                        <th className="numeric">
+                            1 Day
+                            <Sort sortOrder={sort.sortBy === 'dayChange1' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('dayChange1', sortOrder)} />
+                        </th>
                         <th className="numeric">1 Week</th>
                         <th className="numeric">2 Week</th>
                         <th className="numeric">1 Month</th>
                         <th className="numeric">3 Month</th>
                         <th className="numeric">6 Month</th>
                         <th className="numeric">1 Year</th>
+                        <th className="numeric">2 Year</th>
+                        <th className="numeric">3 Year</th> */}
+                        {
+                            headers.map(item => (
+                                <th className={item.className} key={item.key}>
+                                    <span>{item.title}</span>
+                                    <Sort sortOrder={sort.sortBy === item.key ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange(item.key as keyof FormattedCandleType, sortOrder)} />
+                                </th>
+                            ))
+                        }
                     </tr>
                 </thead>
                 <tbody>
@@ -318,6 +354,8 @@ const Portfolio = () => {
                                 <td style={getReturnStyles(item.monthChange3)} className="numeric">{item.monthChange3}%</td>
                                 <td style={getReturnStyles(item.monthChange6)} className="numeric">{item.monthChange6}%</td>
                                 <td style={getReturnStyles(item.yearChange1)} className="numeric">{item.yearChange1}%</td>
+                                <td style={getReturnStyles(item.yearChange2)} className="numeric">{item.yearChange2}%</td>
+                                <td style={getReturnStyles(item.yearChange3)} className="numeric">{item.yearChange3}%</td>
 
                             </tr>
                         )
@@ -334,6 +372,8 @@ const Portfolio = () => {
                         <td className="numeric">{averageReturns.monthChange3}%</td>
                         <td className="numeric">{averageReturns.monthChange6}%</td>
                         <td className="numeric">{averageReturns.yearChange1}%</td>
+                        <td className="numeric">{averageReturns.yearChange2}%</td>
+                        <td className="numeric">{averageReturns.yearChange3}%</td>
                     </tr>
                     {indexReturns.map((item, index) => {
                         return (
@@ -353,6 +393,8 @@ const Portfolio = () => {
                                 <td className="numeric">{item.monthChange3}%</td>
                                 <td className="numeric">{item.monthChange6}%</td>
                                 <td className="numeric">{item.yearChange1}%</td>
+                                <td className="numeric">{item.yearChange2}%</td>
+                                <td className="numeric">{item.yearChange3}%</td>
                             </tr>
                         )
                     })}
