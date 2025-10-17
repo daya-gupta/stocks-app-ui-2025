@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
-import { baseUrl, GLOBAL_LIST, instruments } from "./utils/constants";
+import { GLOBAL_LIST, instruments } from "./utils/constants";
 import { CandleType } from "./utils/types";
 import Sort from "./sort";
 
-export const BASE_URL = `${process.env.API_URL}:${process.env.PORT}`;
-console.log(BASE_URL);
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
+console.log(API_URL);
 
 const defaultAverageReturns = {
     dayChange1: 0,
@@ -178,7 +178,7 @@ const Portfolio = () => {
             }
         }
         const promiseArray = [];
-        const deliveryReq = fetch(`${baseUrl}/historicalDataUpstox`, {
+        const deliveryReq = fetch(`${API_URL}/historicalDataUpstox`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -187,7 +187,7 @@ const Portfolio = () => {
         });
         promiseArray.push(deliveryReq);
 
-        const intradayReq = fetch(`${baseUrl}/intradayData`, {
+        const intradayReq = fetch(`${API_URL}/intradayData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -219,7 +219,7 @@ const Portfolio = () => {
     //             interval,
     //         }
     //     }
-    //     fetch(`${baseUrl}/intradayData`, {
+    //     fetch(`${API_URL}/intradayData`, {
     //         method: 'POST',
     //         headers: {
     //             'Content-Type': 'application/json'

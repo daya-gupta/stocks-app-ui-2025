@@ -188,7 +188,7 @@ export const GLOBAL_LIST: GlobalListMap = {
     },
 };
 
-export const baseUrl = 'http://localhost:3000';
+// export const baseUrl = 'http://localhost:4000';
 
 export const instruments = [
     "NSE_EQ%7CINE731H01025", //ACE

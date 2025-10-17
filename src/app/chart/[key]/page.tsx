@@ -2,10 +2,13 @@
 import { useParams } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { createChart, CandlestickSeries, HistogramSeries, LineSeries, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
-import { baseUrl, GLOBAL_LIST, intervalOptions, smaOptions } from "../../utils/constants";
+import { GLOBAL_LIST, intervalOptions, smaOptions } from "../../utils/constants";
 // import Link from "next/link";
 import { sma } from 'indicatorts';
 import moment from "moment";
+
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
+console.log(API_URL);
 
 const chartProperties = {
     width: 1200,
@@ -74,12 +77,12 @@ const Chart = () => {
             }
         }
         if (interval === 'day' || interval === 'week') {
-            // no intraday data exist for day or week intervals
+            // no intraday data exist for day or week intervals?
             intradayPayload.filter.interval = '30minute';
         }
         const promiseArray = [];
 
-        const intradayReq = fetch(`${baseUrl}/historicalDataUpstox`, {
+        const intradayReq = fetch(`${API_URL}/intradayData`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -90,7 +93,7 @@ const Chart = () => {
         promiseArray.push(intradayReq);
 
         if (interval !== '1minute' && interval !== '30minute') {
-            const deliveryReq = fetch(`${baseUrl}/historicalDataUpstox`, {
+            const deliveryReq = fetch(`${API_URL}/historicalDataUpstox`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
