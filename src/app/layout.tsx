@@ -4,6 +4,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./header/page";
+import MarketStatus from "./components/MarketStatus";
+import StockPrice from "./components/StockPrice";
+// import AutoComplete from "./components/AutoComplete";
+import AutoCompletex from "./components/AutoCompletex";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,41 +32,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Header />
-        <div style={{margin: '16px 5%', width: '90%'}}>
-          {children}
-        </div>
-        {/* <footer className={styles.footer}>
-          <a
-            href="contact"
-            // target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/file.svg"
-              alt="File icon"
-              width={16}
-              height={16}
-            />
-            Contact Us
-          </a>
-          <a
-            href="https://www.youtube.com/@investingwithdayanand"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              aria-hidden
-              src="/window.svg"
-              alt="Window icon"
-              width={16}
-              height={16}
-            />
-            YouTube
-          </a>
-        </footer> */}
-
+        {/* <div style={{ display: 'flex', flexDirection: 'column' }}> */}
+          <div style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+            <Header />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 5%', gap: '16px' }}>
+              <StockPrice instrumentKey="NSE_INDEX|Nifty 50" />
+              <MarketStatus />
+              {/* <AutoComplete /> */}
+              <AutoCompletex />
+            </div>
+          </div>
+          <div style={{margin: '16px 5%', width: '90%'}}>
+            {children}
+          </div>
+        {/* </div> */}
       </body>
     </html>
   );

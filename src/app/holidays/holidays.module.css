@@ -1,0 +1,35 @@
+.container {
+    padding: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+}
+
+.tableContainer {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.table th {
+    background-color: #f7fafc;
+    font-weight: 600;
+}
+
+.table tr:hover {
+    background-color: #f7fafc;
+}

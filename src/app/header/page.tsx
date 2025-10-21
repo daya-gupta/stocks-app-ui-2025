@@ -16,6 +16,7 @@ export default function Header() {
                 <Link className="nav-item" href='/chart/NSE_INDEX%7CNifty%2050'>Home</Link>                
                 <Link className="nav-item" href='/model-portfolio'>Model Portfolios</Link>                
                 <Link className="nav-item" href='/youtube-video'>YouTube Videos</Link>                
+                <Link className="nav-item" href='/holidays'>Market Holidays</Link>                
             </div>
             <div className="profile">
                 <FaUserCircle className="icon-medium" style={{fontSize: '50px'}}  />

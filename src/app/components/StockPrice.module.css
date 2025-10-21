@@ -1,0 +1,25 @@
+.priceContainer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.price {
+    font-weight: 600;
+}
+
+.change {
+    font-size: 0.9em;
+}
+
+.positive {
+    color: #4CAF50;
+}
+
+.negative {
+    color: #F44336;
+}
