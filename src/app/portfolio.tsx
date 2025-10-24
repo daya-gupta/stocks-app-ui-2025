@@ -1,9 +1,12 @@
 'use client';
+
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { TableIcon, BarChartIcon } from "lucide-react"
 import { useEffect, useState } from "react";
+import nseData from './../../misc/NSE.json';
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
-import { GLOBAL_LIST, instruments } from "./utils/constants";
 import { CandleType } from "./utils/types";
 import Sort from "./sort";
 
@@ -47,12 +50,20 @@ type averageReturnType = {
     weekChange1: number;
     weekChange2: number;
     monthChange1: number;
-    monthChange3: number,
-    monthChange6: number,
-    yearChange1: number,
-    yearChange2: number,
-    yearChange3: number,
+    monthChange3: number;
+    monthChange6: number;
+    yearChange1: number;
+    yearChange2: number;
+    yearChange3: number;
 };
+
+// Create lookup map from NSE data
+const nseInstrumentsMap = nseData.reduce((acc: Record<string, any>, item) => {
+    if (item.segment === 'NSE_EQ' && item.instrument_type === 'EQ') {
+        acc[item.instrument_key] = item;
+    }
+    return acc;
+}, {});
 
 const getIndex = (data: [CandleType], quantity: number, unit: string) => {
     const currentDate = moment(data[0][0]);
@@ -65,7 +76,7 @@ const getIndex = (data: [CandleType], quantity: number, unit: string) => {
 const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): { formattedData: FormattedCandleType[], averageReturns: averageReturnType, benchmarkData: FormattedCandleType[] } => {
     const formattedData: FormattedCandleType[] = [];
     dData.forEach((item, index) => {
-        const instrumentDetails = GLOBAL_LIST[item.instrument] || {};
+        const instrumentDetails = nseInstrumentsMap[item.instrument] || {};
         const name = instrumentDetails.name || item.instrument;
         // consider intraday data only when same date does not exist within delivery data
         // TBD - handle weekly data
@@ -156,24 +167,50 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
 //     return [formattedData];
 // }
 
+interface Watchlist {
+  id: string;
+  name: string;
+  instruments: string[];
+}
+
 const Portfolio = () => {
     const [data, setData] = useState<Array<FormattedCandleType>>([]);
     const [averageReturns, setAverageReturns] = useState<averageReturnType>({ ...defaultAverageReturns });
     const [indexReturns, setIndexReturns] = useState<FormattedCandleType[]>([]);
+    const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
+    const [selectedWatchlist, setSelectedWatchlist] = useState<string>('');
+    const [view, setView] = useState<"table" | "chart">("table")
 
-    const fetchData = () => {
+    const fetchWatchlists = async () => {
+        try {
+            const response = await fetch(`${API_URL}/watchlists`);
+            const data = await response.json();
+            setWatchlists(data);
+            if (data.length > 0) {
+                setSelectedWatchlist(data[0].id);
+            }
+        } catch (error) {
+            console.error('Error fetching watchlists:', error);
+        }
+    };
+
+    const fetchData = async () => {
+        if (!selectedWatchlist) return;
+        
+        const currentWatchlist = watchlists.find(w => w.id === selectedWatchlist);
+        if (!currentWatchlist) return;
+
         const deliveryPayload = {
             filter: {
-                instruments,
+                instruments: currentWatchlist.instruments,
                 interval: 'day',
                 from_date: '2022-03-01',
-                // "to_date": "2025-03-06"
                 to_date: new Date().toISOString().split('T')[0]
             }
         }
         const intradayPayload = {
             filter: {
-                instruments,
+                instruments: currentWatchlist.instruments,
                 interval: '30minute',
             }
         }
@@ -245,11 +282,14 @@ const Portfolio = () => {
     // }
 
     useEffect(() => {
-        fetchData();
-        return () => {
-            console.log('unmounting');
-        }
+        fetchWatchlists();
     }, []);
+
+    useEffect(() => {
+        if (selectedWatchlist) {
+            fetchData();
+        }
+    }, [selectedWatchlist]);
 
     const getReturnStyles = (value: number) => {
         // tbd assign color codes based on relative values
@@ -301,105 +341,151 @@ const Portfolio = () => {
     ];
 
     return (
-        <div>
-            <h1>Model Portfolio - Growth 30</h1>
-            <br />
-            <table>
-                <thead>
-                    <tr>
-                        {/* <th>Name</th>
-                        <th className="numeric">
-                            Price
-                            <Sort sortOrder={sort.sortBy === 'price' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('price', sortOrder)} />
-                        </th>
-                        <th className="numeric">
-                            1 Day
-                            <Sort sortOrder={sort.sortBy === 'dayChange1' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('dayChange1', sortOrder)} />
-                        </th>
-                        <th className="numeric">1 Week</th>
-                        <th className="numeric">2 Week</th>
-                        <th className="numeric">1 Month</th>
-                        <th className="numeric">3 Month</th>
-                        <th className="numeric">6 Month</th>
-                        <th className="numeric">1 Year</th>
-                        <th className="numeric">2 Year</th>
-                        <th className="numeric">3 Year</th> */}
-                        {
-                            headers.map(item => (
-                                <th className={item.className} key={item.key}>
-                                    <span>{item.title}</span>
-                                    <Sort sortOrder={sort.sortBy === item.key ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange(item.key as keyof FormattedCandleType, sortOrder)} />
-                                </th>
-                            ))
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.map((item, index) => {
-                        return (
-                            <tr key={index}>
-                                <td>
-                                    {item.name}
-                                    {/* <button onClick={() => openChart(item.instrument)}>Chart</button> */}
-                                    <Link className="pull-right" href={`/chart/${item.instrument}`}>
-                                        <FaChartLine title="Open Chart" />
-                                    </Link>
-                                    {/* <button onClick={() => fetchIntradayData([item.instrument], '30minute')}>Intraday</button> */}
-                                </td>
-                                <td className="numeric">{item.price}</td>
-                                <td style={getReturnStyles(item.dayChange1)} className={`numeric`}>{item.dayChange1}%</td>
-                                <td style={getReturnStyles(item.weekChange1)} className="numeric">{item.weekChange1}%</td>
-                                <td style={getReturnStyles(item.weekChange2)} className="numeric">{item.weekChange2}%</td>
-                                <td style={getReturnStyles(item.monthChange1)} className="numeric">{item.monthChange1}%</td>
-                                <td style={getReturnStyles(item.monthChange3)} className="numeric">{item.monthChange3}%</td>
-                                <td style={getReturnStyles(item.monthChange6)} className="numeric">{item.monthChange6}%</td>
-                                <td style={getReturnStyles(item.yearChange1)} className="numeric">{item.yearChange1}%</td>
-                                <td style={getReturnStyles(item.yearChange2)} className="numeric">{item.yearChange2}%</td>
-                                <td style={getReturnStyles(item.yearChange3)} className="numeric">{item.yearChange3}%</td>
+        <div className="p-4">
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold">Model Portfolio - Growth 30</h1>
+                <div className="flex items-center gap-4">
+                    <select 
+                        value={selectedWatchlist}
+                        onChange={(e) => setSelectedWatchlist(e.target.value)}
+                        className="border rounded px-3 py-2"
+                    >
+                        {watchlists.map(watchlist => (
+                            <option key={watchlist.id} value={watchlist.id}>
+                                {watchlist.name}
+                            </option>
+                        ))}
+                    </select>
+                    <ToggleGroup type="single" value={view} onValueChange={(v) => v && setView(v as "table" | "chart")}>
+                        <ToggleGroupItem value="table" aria-label="Table view">
+                            <TableIcon className="h-4 w-4" />
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="chart" aria-label="Chart view">
+                            <BarChartIcon className="h-4 w-4" />
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                </div>
+            </div>
 
-                            </tr>
-                        )
-                    })}
-                </tbody>
-                <tfoot style={{ fontWeight: 'bold' }}>
-                    <tr>
-                        <td>Average</td>
-                        <td className="numeric"></td>
-                        <td className="numeric">{averageReturns.dayChange1}%</td>
-                        <td className="numeric">{averageReturns.weekChange1}%</td>
-                        <td className="numeric">{averageReturns.weekChange2}%</td>
-                        <td className="numeric">{averageReturns.monthChange1}%</td>
-                        <td className="numeric">{averageReturns.monthChange3}%</td>
-                        <td className="numeric">{averageReturns.monthChange6}%</td>
-                        <td className="numeric">{averageReturns.yearChange1}%</td>
-                        <td className="numeric">{averageReturns.yearChange2}%</td>
-                        <td className="numeric">{averageReturns.yearChange3}%</td>
-                    </tr>
-                    {indexReturns.map((item, index) => {
-                        return (
-                            <tr key={index}>
-                                <td>
-                                    {item.name}
-                                    {/* <button onClick={() => openChart(item.instrument)}>Chart</button> */}
-                                    <Link className="pull-right" href={`/chart/${item.instrument}`}>
-                                        <FaChartLine />
+            {view === "table" ? (
+                <table>
+                    <thead>
+                        <tr>
+                            {/* <th>Name</th>
+                            <th className="numeric">
+                                Price
+                                <Sort sortOrder={sort.sortBy === 'price' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('price', sortOrder)} />
+                            </th>
+                            <th className="numeric">
+                                1 Day
+                                <Sort sortOrder={sort.sortBy === 'dayChange1' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('dayChange1', sortOrder)} />
+                            </th>
+                            <th className="numeric">1 Week</th>
+                            <th className="numeric">2 Week</th>
+                            <th className="numeric">1 Month</th>
+                            <th className="numeric">3 Month</th>
+                            <th className="numeric">6 Month</th>
+                            <th className="numeric">1 Year</th>
+                            <th className="numeric">2 Year</th>
+                            <th className="numeric">3 Year</th> */}
+                            {
+                                headers.map(item => (
+                                    <th className={item.className} key={item.key}>
+                                        <span>{item.title}</span>
+                                        <Sort sortOrder={sort.sortBy === item.key ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange(item.key as keyof FormattedCandleType, sortOrder)} />
+                                    </th>
+                                ))
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((item, index) => {
+                            return (
+                                <tr key={index}>
+                                    <td>
+                                        {item.name}
+                                        {/* <button onClick={() => openChart(item.instrument)}>Chart</button> */}
+                                        <Link className="pull-right" href={`/chart/${item.instrument}`}>
+                                            <FaChartLine title="Open Chart" />
+                                        </Link>
+                                        {/* <button onClick={() => fetchIntradayData([item.instrument], '30minute')}>Intraday</button> */}
+                                    </td>
+                                    <td className="numeric">{item.price}</td>
+                                    <td style={getReturnStyles(item.dayChange1)} className={`numeric`}>{item.dayChange1}%</td>
+                                    <td style={getReturnStyles(item.weekChange1)} className="numeric">{item.weekChange1}%</td>
+                                    <td style={getReturnStyles(item.weekChange2)} className="numeric">{item.weekChange2}%</td>
+                                    <td style={getReturnStyles(item.monthChange1)} className="numeric">{item.monthChange1}%</td>
+                                    <td style={getReturnStyles(item.monthChange3)} className="numeric">{item.monthChange3}%</td>
+                                    <td style={getReturnStyles(item.monthChange6)} className="numeric">{item.monthChange6}%</td>
+                                    <td style={getReturnStyles(item.yearChange1)} className="numeric">{item.yearChange1}%</td>
+                                    <td style={getReturnStyles(item.yearChange2)} className="numeric">{item.yearChange2}%</td>
+                                    <td style={getReturnStyles(item.yearChange3)} className="numeric">{item.yearChange3}%</td>
+
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                    <tfoot style={{ fontWeight: 'bold' }}>
+                        <tr>
+                            <td>Average</td>
+                            <td className="numeric"></td>
+                            <td className="numeric">{averageReturns.dayChange1}%</td>
+                            <td className="numeric">{averageReturns.weekChange1}%</td>
+                            <td className="numeric">{averageReturns.weekChange2}%</td>
+                            <td className="numeric">{averageReturns.monthChange1}%</td>
+                            <td className="numeric">{averageReturns.monthChange3}%</td>
+                            <td className="numeric">{averageReturns.monthChange6}%</td>
+                            <td className="numeric">{averageReturns.yearChange1}%</td>
+                            <td className="numeric">{averageReturns.yearChange2}%</td>
+                            <td className="numeric">{averageReturns.yearChange3}%</td>
+                        </tr>
+                        {indexReturns.map((item, index) => {
+                            return (
+                                <tr key={index}>
+                                    <td>
+                                        {item.name}
+                                        {/* <button onClick={() => openChart(item.instrument)}>Chart</button> */}
+                                        <Link className="pull-right" href={`/chart/${item.instrument}`}>
+                                            <FaChartLine />
+                                        </Link>
+                                    </td>
+                                    <td className="numeric">{item.price}</td>
+                                    <td className="numeric">{item.dayChange1}%</td>
+                                    <td className="numeric">{item.weekChange1}%</td>
+                                    <td className="numeric">{item.weekChange2}%</td>
+                                    <td className="numeric">{item.monthChange1}%</td>
+                                    <td className="numeric">{item.monthChange3}%</td>
+                                    <td className="numeric">{item.monthChange6}%</td>
+                                    <td className="numeric">{item.yearChange1}%</td>
+                                    <td className="numeric">{item.yearChange2}%</td>
+                                    <td className="numeric">{item.yearChange3}%</td>
+                                </tr>
+                            )
+                        })}
+                    </tfoot>
+                </table>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {data.map((item, index) => (
+                        <div key={index} className="p-4 border rounded-lg shadow-sm">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-medium">{item.name}</h3>
+                                    <Link href={`/chart/${item.instrument}`}>
+                                        <FaChartLine className="mt-1" />
                                     </Link>
-                                </td>
-                                <td className="numeric">{item.price}</td>
-                                <td className="numeric">{item.dayChange1}%</td>
-                                <td className="numeric">{item.weekChange1}%</td>
-                                <td className="numeric">{item.weekChange2}%</td>
-                                <td className="numeric">{item.monthChange1}%</td>
-                                <td className="numeric">{item.monthChange3}%</td>
-                                <td className="numeric">{item.monthChange6}%</td>
-                                <td className="numeric">{item.yearChange1}%</td>
-                                <td className="numeric">{item.yearChange2}%</td>
-                                <td className="numeric">{item.yearChange3}%</td>
-                            </tr>
-                        )
-                    })}
-                </tfoot>
-            </table>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-lg font-bold">₹{item.price}</div>
+                                    <div className={`text-sm ${item.dayChange1 >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                        {item.dayChange1}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

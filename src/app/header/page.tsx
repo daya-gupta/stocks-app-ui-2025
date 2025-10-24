@@ -5,12 +5,13 @@ import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 
 export default function Header() {
     return (
-        <div className="header">
-            <div className="logo" style={{ backgroundColor: '#52a9ff' }}>
+        <div className="header" style={{ background: '#52b2ffa1'}}>
+            <div className="logo" style={{ backgroundColor: '#52a9ff', borderRadius: '50%' }}>
                 {/* <FaCodepen className="icon-large" /> */}
-                Grow
-                <RiMoneyRupeeCircleFill style={{fontSize: '50px'}} />
-                More
+                Generate
+                <br />
+                {/* <RiMoneyRupeeCircleFill style={{fontSize: '50px'}} /> */}
+                <span className="text-3xl">Alpha</span>
             </div>
             <div className="nav">
                 <Link className="nav-item" href='/chart/NSE_INDEX%7CNifty%2050'>Home</Link>                

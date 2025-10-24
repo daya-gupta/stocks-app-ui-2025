@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from './MarketStatus.module.css';
+import StockPrice from './StockPrice';
 
 interface MarketStatusData {
     exchange: string;
@@ -31,12 +32,24 @@ export default function MarketStatus() {
 
     if (!status) return null;
 
-    const statusColor = status.status === 'NORMAL_OPEN' ? '#4CAF50' : '#FF9800';
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'NORMAL_OPEN':
+                return '#22c55e'; // green-500
+            case 'NORMAL_CLOSE':
+                return '#ef4444'; // red-500
+            default:
+                return '#f97316'; // orange-500
+        }
+    };
+
+    const statusColor = getStatusColor(status.status);
 
     return (
-        <div className={styles.statusContainer}>
-            <span className={styles.statusDot} style={{ backgroundColor: statusColor }}></span>
-            <span>Market {status.status.replace('_', ' ')}</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }}></span>
+            <span className="text-sm font-medium">{status.status.replace('_', ' ')}</span>
+            <StockPrice instrumentKey="NSE_INDEX|Nifty 50" />
         </div>
     );
 }

@@ -5,7 +5,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./header/page";
 import MarketStatus from "./components/MarketStatus";
-import StockPrice from "./components/StockPrice";
 // import AutoComplete from "./components/AutoComplete";
 import AutoCompletex from "./components/AutoCompletex";
 
@@ -33,13 +32,13 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {/* <div style={{ display: 'flex', flexDirection: 'column' }}> */}
-          <div style={{ position: 'sticky', top: 0, zIndex: 100 }}>
+          {/* <div style={{ position: 'sticky', top: 0, zIndex: 100 }}> */}
+          <div>
             <Header />
             <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '8px 5%', gap: '16px' }}>
-              <StockPrice instrumentKey="NSE_INDEX|Nifty 50" />
+              <AutoCompletex />
               <MarketStatus />
               {/* <AutoComplete /> */}
-              <AutoCompletex />
             </div>
           </div>
           <div style={{margin: '16px 5%', width: '90%'}}>
