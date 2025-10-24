@@ -3,12 +3,12 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { TableIcon, BarChartIcon } from "lucide-react"
 import { useEffect, useState } from "react";
-import nseData from './../../misc/NSE.json';
+import nseData from '../../../../../misc/NSE.json';
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
-import { CandleType } from "./utils/types";
-import Sort from "./sort";
+import { CandleType } from "../../../utils/types";
+import Sort from "../../../sort";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 console.log(API_URL);

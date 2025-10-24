@@ -3,7 +3,7 @@ import { FaUserCircle } from "react-icons/fa";
 // import { FaCodepen } from "react-icons/fa";
 import { RiMoneyRupeeCircleFill } from "react-icons/ri";
 
-export default function Header() {
+export default function Banner() {
     return (
         <div className="header" style={{ background: '#52b2ffa1'}}>
             <div className="logo" style={{ backgroundColor: '#52a9ff', borderRadius: '50%' }}>
@@ -15,9 +15,9 @@ export default function Header() {
             </div>
             <div className="nav">
                 <Link className="nav-item" href='/chart/NSE_INDEX%7CNifty%2050'>Home</Link>                
-                <Link className="nav-item" href='/model-portfolio'>Model Portfolios</Link>                
-                <Link className="nav-item" href='/youtube-video'>YouTube Videos</Link>                
-                <Link className="nav-item" href='/holidays'>Market Holidays</Link>                
+                <Link className="nav-item" href='/alpha/model-portfolio'>Model Portfolios</Link>                
+                <Link className="nav-item" href='/dashboard/youtube-video'>YouTube Videos</Link>                
+                <Link className="nav-item" href='/dashboard/holidays'>Market Holidays</Link>                
             </div>
             <div className="profile">
                 <FaUserCircle className="icon-medium" style={{fontSize: '50px'}}  />
