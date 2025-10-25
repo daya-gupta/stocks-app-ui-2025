@@ -9,6 +9,7 @@ import Link from "next/link";
 import moment from "moment";
 import { CandleType } from "../../../utils/types";
 import Sort from "../../../sort";
+import { apiClient } from "@/lib/api";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 console.log(API_URL);
@@ -173,7 +174,7 @@ interface Watchlist {
   instruments: string[];
 }
 
-const Portfolio = () => {
+const Portfolio = ({watchlistId}: {watchlistId: string}) => {
     const [data, setData] = useState<Array<FormattedCandleType>>([]);
     const [averageReturns, setAverageReturns] = useState<averageReturnType>({ ...defaultAverageReturns });
     const [indexReturns, setIndexReturns] = useState<FormattedCandleType[]>([]);
@@ -183,8 +184,7 @@ const Portfolio = () => {
 
     const fetchWatchlists = async () => {
         try {
-            const response = await fetch(`${API_URL}/watchlists`);
-            const data = await response.json();
+            const data = await apiClient.get('/watchlists')
             setWatchlists(data);
             if (data.length > 0) {
                 setSelectedWatchlist(data[0].id);
@@ -248,38 +248,6 @@ const Portfolio = () => {
             })
             .catch(error => console.error(error));
     }
-
-    // const fetchIntradayData = (instruments, interval) => {
-    //     const payload = {
-    //         "filter": {
-    //             instruments,
-    //             interval,
-    //         }
-    //     }
-    //     fetch(`${API_URL}/intradayData`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         },
-    //         body: JSON.stringify(payload)
-    //     })
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             const formattedData = [];
-    //             data.forEach((item) => {
-    //                 const instrumentDetails = GLOBAL_LIST[item.instrument] || {};
-    //                 const name = instrumentDetails.name || item.instrument;
-    //                 const price = item.candles[0][4];
-    //                 formattedData.push({
-    //                     instrument: item.instrument,
-    //                     name,
-    //                     price,
-    //                 });
-    //             })
-    //             return [formattedData];
-    //         })
-    //         .catch(error => console.error(error));
-    // }
 
     useEffect(() => {
         fetchWatchlists();
