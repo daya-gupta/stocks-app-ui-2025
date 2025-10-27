@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { apiClient } from '@/lib/api'
 
-import CurrentPortfolio from "./components/portfolio";
+import PortfolioComponent from "./components/portfolio";
 
 const Portfolio = () => {
   const [watchlists, setWatchlists] = useState([]);
@@ -11,7 +11,7 @@ const Portfolio = () => {
 
   const fetchWatchlists = async () => {
     try {
-      const data = await apiClient.get('/watchlists')
+      const data = await apiClient.get('/watchlists');
       setWatchlists(data);
       if (data.length > 0) {
         setSelectedWatchlist(data[0].id);
@@ -35,7 +35,7 @@ const Portfolio = () => {
         <p>Watchlists: {watchlists.map(w => w.id).join(', ')}</p>
       </div>
 
-      {selectedWatchlist && <CurrentPortfolio watchlistId={selectedWatchlist} />}
+      {selectedWatchlist && <PortfolioComponent watchlistId={selectedWatchlist} />}
     </div>
 
   );

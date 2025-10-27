@@ -15,7 +15,7 @@ export default function Banner() {
             </div>
             <div className="nav">
                 <Link className="nav-item" href='/chart/NSE_INDEX%7CNifty%2050'>Home</Link>                
-                <Link className="nav-item" href='/alpha/model-portfolio'>Model Portfolios</Link>                
+                <Link className="nav-item" href='/dashboard/model-portfolio'>Model Portfolios</Link>                
                 <Link className="nav-item" href='/dashboard/youtube-video'>YouTube Videos</Link>                
                 <Link className="nav-item" href='/dashboard/holidays'>Market Holidays</Link>                
             </div>

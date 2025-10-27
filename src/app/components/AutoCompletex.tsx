@@ -71,7 +71,7 @@ const filteredNSEData = nseData.filter(
 //   },
 // ]
 
-const AutoCompletex = () => {
+const AutoCompletex = ({onSelect}: {onSelect: (stock: StockData) => void}) => {
   const [open, setOpen] = React.useState(false)
   const [selectedStock, setSelectedStock] = React.useState<StockData | null>(null);
   const [marketPrice, setMarketPrice] = React.useState<MarketPrice | null>(null);
@@ -120,6 +120,7 @@ const AutoCompletex = () => {
                     value={stock.name}
                     onSelect={() => {
                       setSelectedStock(stock)
+                      onSelect(stock);
                       fetchMarketPrice(stock.isin)
                       setOpen(false)
                     }}
