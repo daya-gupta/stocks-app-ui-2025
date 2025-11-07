@@ -3,12 +3,13 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { TableIcon, BarChartIcon } from "lucide-react"
 import { useEffect, useState } from "react";
-import nseData from '../../../../../misc/NSE.json';
+// import nseData from '../../../../../misc/NSE.json';
+import nseData from './../../../misc/NSE.json';
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
-import { CandleType } from "../../../utils/types";
-import Sort from "../../../sort";
+import { CandleType } from "../utils/types";
+import Sort from "../sort";
 import { apiClient } from "@/lib/api";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
@@ -174,7 +175,7 @@ interface Watchlist {
   instruments: string[];
 }
 
-const Portfolio = ({watchlistId}: {watchlistId: string}) => {
+const Watchlist = ({watchlistId}: {watchlistId: string}) => {
     const [data, setData] = useState<Array<FormattedCandleType>>([]);
     const [averageReturns, setAverageReturns] = useState<averageReturnType>({ ...defaultAverageReturns });
     const [indexReturns, setIndexReturns] = useState<FormattedCandleType[]>([]);
@@ -197,12 +198,25 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
     const fetchData = async () => {
         if (!selectedWatchlist) return;
         
-        const currentWatchlist = watchlists.find(w => w.id === selectedWatchlist);
-        if (!currentWatchlist) return;
+        // const currentWatchlist = watchlists.find(w => w.id === selectedWatchlist);
+        // if (!currentWatchlist) return;
+
+        // const fetchEntries = async () => {
+            // setLoading(true)
+        let instruments: string[] = [];
+        try {
+            const data = await apiClient.get(`/watchlists/${selectedWatchlist}/entries`)
+            // setEntries(allEntries)
+            instruments = data.map((item: { instrument_key: string }) => item.instrument_key);
+        } catch (error) {
+            console.error('Error fetching entries:', error)
+        }
+        //   }
 
         const deliveryPayload = {
             filter: {
-                instruments: currentWatchlist.instruments,
+                // instruments: currentWatchlist.instruments,
+                instruments,
                 interval: 'day',
                 from_date: '2022-03-01',
                 to_date: new Date().toISOString().split('T')[0]
@@ -210,7 +224,7 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
         }
         const intradayPayload = {
             filter: {
-                instruments: currentWatchlist.instruments,
+                instruments,
                 interval: '30minute',
             }
         }
@@ -311,7 +325,7 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
     return (
         <div className="p-4">
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Model Portfolio - Growth 30</h1>
+                <h1 className="text-2xl font-bold">Model Watchlist - Growth 30</h1>
                 <div className="flex items-center gap-4">
                     <select 
                         value={selectedWatchlist}
@@ -458,4 +472,4 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
     )
 }
 
-export default Portfolio;
+export default Watchlist;

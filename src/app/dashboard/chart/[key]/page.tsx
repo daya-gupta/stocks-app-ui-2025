@@ -2,8 +2,7 @@
 import { useParams } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { createChart, CandlestickSeries, HistogramSeries, LineSeries, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
-import { GLOBAL_LIST, intervalOptions, smaOptions } from "../../utils/constants";
-// import Link from "next/link";
+import { GLOBAL_LIST, intervalOptions, smaOptions } from "@/app/utils/constants";
 import { sma } from 'indicatorts';
 import moment from "moment";
 

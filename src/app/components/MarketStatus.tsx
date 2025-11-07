@@ -30,8 +30,14 @@ export default function MarketStatus() {
         return () => clearInterval(interval);
     }, []);
 
-    if (!status) return null;
-
+    if (!status) {
+        return (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                Loading status please wait...
+            </div>
+        );
+    }
+    
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'NORMAL_OPEN':

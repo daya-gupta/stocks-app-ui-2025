@@ -155,11 +155,15 @@ a {
 
 .nav {
   flex-grow: 1;
-  padding: 22px 22px 22px 50px;
+  /* padding: 22px 22px 22px 50px; */
+  display: flex
 }
 
 .nav-item {
-  padding: 28px;
+  padding: 25px;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: normal;
 }
 
 a.nav-item:hover {
