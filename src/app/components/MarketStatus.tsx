@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from './MarketStatus.module.css';
 import StockPrice from './StockPrice';
 
 interface MarketStatusData {
@@ -18,7 +17,9 @@ export default function MarketStatus() {
             try {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/marketStatus`);
                 const data = await response.json();
-                setStatus(data.data);
+                let customStatus = data.data.status;
+                customStatus = customStatus.indexOf('OPEN') !== -1 ? 'OPEN' : 'CLOSED';
+                setStatus({ ...data.data, status: customStatus });
             } catch (error) {
                 console.error('Error fetching market status:', error);
             }
@@ -33,16 +34,16 @@ export default function MarketStatus() {
     if (!status) {
         return (
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                Loading status please wait...
+                Loading Market Status...
             </div>
         );
     }
-    
+
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'NORMAL_OPEN':
+            case 'OPEN':
                 return '#22c55e'; // green-500
-            case 'NORMAL_CLOSE':
+            case 'CLOSED':
                 return '#ef4444'; // red-500
             default:
                 return '#f97316'; // orange-500
@@ -52,10 +53,12 @@ export default function MarketStatus() {
     const statusColor = getStatusColor(status.status);
 
     return (
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }}></span>
-            <span className="text-sm font-medium">{status.status.replace('_', ' ')}</span>
+        <div className="px-4 py-4">
             <StockPrice instrumentKey="NSE_INDEX|Nifty 50" />
+            <div className="text-center">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }}></span>
+                <span className="text-sm font-medium inline-block" style={{ color: statusColor }}>{status.status.replace('_', ' ')}</span>
+            </div>
         </div>
     );
 }

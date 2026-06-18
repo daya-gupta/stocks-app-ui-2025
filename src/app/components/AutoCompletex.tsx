@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import nseData from './../../../misc/NSE.json';
+import nseData from './../../../misc/NSE_mini.json';
 
 interface StockData {
   name: string;
@@ -119,6 +119,13 @@ const AutoCompletex = ({onSelect}: {onSelect: (stock: StockData) => void}) => {
                     key={stock.isin}
                     value={stock.name}
                     onSelect={() => {
+                      setSelectedStock(stock)
+                      onSelect(stock);
+                      fetchMarketPrice(stock.isin)
+                      setOpen(false)
+                    }}
+                    onClick={() => {
+                      console.log('clicked', stock);
                       setSelectedStock(stock)
                       onSelect(stock);
                       fetchMarketPrice(stock.isin)

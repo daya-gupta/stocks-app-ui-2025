@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react'
 import { apiClient } from '@/lib/api'
 import { Button } from '@/components/ui/button'
-// import { Input } from '@/components/ui/input'
-// import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -23,7 +21,7 @@ interface Watchlist {
 
 export default function WatchlistPage() {
   const [watchlists, setWatchlists] = useState<Watchlist[]>([])
-  const [selectedWatchlists, setSelectedWatchlists] = useState<string[]>([])
+  const [selectedWatchlists, setSelectedWatchlist] = useState<string[]>([])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingWatchlist, setEditingWatchlist] = useState<Watchlist | null>(null)
 
@@ -35,6 +33,9 @@ export default function WatchlistPage() {
     try {
       const data = await apiClient.get('/watchlists')
       setWatchlists(data)
+      if (data.length > 0) {
+        setSelectedWatchlist([data[0].id])
+      }
     } catch (error) {
       console.error('Error fetching watchlists:', error)
     }
@@ -61,12 +62,6 @@ export default function WatchlistPage() {
     }
   }
 
-  const toggleWatchlistSelection = (id: string) => {
-    setSelectedWatchlists(prev =>
-      prev.includes(id) ? prev.filter(w => w !== id) : [...prev, id]
-    )
-  }
-
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -77,18 +72,24 @@ export default function WatchlistPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-1">
-          <div className="space-y-4">
+      <div className="">
+        <div className="">
+          <div className="flex">
             {watchlists.map(watchlist => (
-              <Card key={watchlist.id} className={`cursor-pointer transition-all ${
-                selectedWatchlists.includes(watchlist.id) ? 'ring-2 ring-blue-500' : ''
-              }`}>
+              <Card
+                key={watchlist.id}
+                className={`cursor-pointer transition-all ${selectedWatchlists.includes(watchlist.id) ? 'ring-2 ring-blue-500' : ''}`}
+                onClick={() => {
+                  if (!selectedWatchlists.includes(watchlist.id)) {
+                    setSelectedWatchlist([watchlist.id])
+                  }
+                }
+                }
+              >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
-                    <CardTitle 
+                    <CardTitle
                       className="text-lg"
-                      onClick={() => toggleWatchlistSelection(watchlist.id)}
                     >
                       {watchlist.name}
                     </CardTitle>
@@ -127,7 +128,7 @@ export default function WatchlistPage() {
           </div>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="pt-4">
           {selectedWatchlists.length > 0 ? (
             <Tabs defaultValue="stocks" className="w-full">
               <TabsList>
@@ -135,7 +136,7 @@ export default function WatchlistPage() {
                 <TabsTrigger value="history">History</TabsTrigger>
               </TabsList>
               <TabsContent value="stocks">
-                <WatchlistEntries watchlistIds={selectedWatchlists} />
+                <WatchlistEntries watchlistIds={selectedWatchlists} isLoggedIn />
               </TabsContent>
               <TabsContent value="history">
                 <WatchlistHistory watchlistIds={selectedWatchlists} />

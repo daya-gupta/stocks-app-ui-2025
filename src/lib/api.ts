@@ -3,14 +3,15 @@ import { createClient } from './supabase'
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL
 
 class ApiClient {
-  private async getHeaders(): Promise<HeadersInit> {
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
+    private async getHeaders(): Promise<HeadersInit> {
+    // const supabase = createClient()
+    // const { data: { session } } = await supabase.auth.getSession()
+    const access_token = localStorage.getItem('access_token')
     
     return {
       'Content-Type': 'application/json',
-      ...(session?.access_token && {
-        'Authorization': `Bearer ${session.access_token}`
+      ...(access_token && {
+        'Authorization': `Bearer ${access_token}`
       })
     }
   }

@@ -15,13 +15,17 @@ interface WatchlistEntry {
   instrument_key: string
   notes?: string
   created_at: string
+
+  company_name: string
+  trading_symbol: string
 }
 
 interface WatchlistEntriesProps {
-  watchlistIds: string[]
+  watchlistIds: string[];
+  isLoggedIn?: boolean;
 }
 
-export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps) {
+export default function WatchlistEntries({ watchlistIds, isLoggedIn }: WatchlistEntriesProps) {
   const [entries, setEntries] = useState<WatchlistEntry[]>([])
   const [loading, setLoading] = useState(false)
   const [editingEntry, setEditingEntry] = useState<string | null>(null)
@@ -54,7 +58,7 @@ export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps
 
   const handleAddStock = async () => {
     if (!selectedStock || watchlistIds.length === 0) return
-    
+
     try {
       await apiClient.post(`/watchlists/${watchlistIds[0]}/entries`, {
         instrument_key: selectedStock.instrument_key,
@@ -106,10 +110,13 @@ export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Stocks ({entries.length})</h3>
-        <Button onClick={() => setShowAddForm(true)} disabled={watchlistIds.length === 0}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Stock
-        </Button>
+
+        {isLoggedIn && (
+          <Button onClick={() => setShowAddForm(true)} disabled={watchlistIds.length === 0}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Stock
+          </Button>
+        )}
       </div>
 
       {showAddForm && (
@@ -149,7 +156,9 @@ export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
-                  <h4 className="font-medium">{entry.instrument_key}</h4>
+                  <h4 className="font-medium">
+                    {entry.company_name}
+                  </h4>
                   {editingEntry === entry.id ? (
                     <div className="mt-2 space-y-2">
                       <Textarea
@@ -177,6 +186,9 @@ export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps
                     </div>
                   ) : (
                     <>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {entry.trading_symbol}
+                      </p>
                       {entry.notes && (
                         <p className="text-sm text-gray-600 mt-1">{entry.notes}</p>
                       )}
@@ -186,22 +198,28 @@ export default function WatchlistEntries({ watchlistIds }: WatchlistEntriesProps
                     </>
                   )}
                 </div>
-                <div className="flex space-x-1 ml-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => startEditing(entry)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveStock(entry.watchlist_id, entry.instrument_key)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+
+                {
+                  isLoggedIn && (
+                    <div className="flex space-x-1 ml-4">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEditing(entry)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveStock(entry.watchlist_id, entry.instrument_key)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                  )
+                }
               </div>
             </CardContent>
           </Card>

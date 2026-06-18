@@ -30,8 +30,8 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
   })
   const [loading, setLoading] = useState(false)
 
-  const totalAmount = parseFloat(formData.quantity || '0') * parseFloat(formData.price || '0') + 
-                     parseFloat(formData.brokerage || '0') + parseFloat(formData.taxes || '0')
+  const totalAmount = parseFloat(formData.quantity || '0') * parseFloat(formData.price || '0') +
+    parseFloat(formData.brokerage || '0') + parseFloat(formData.taxes || '0')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -41,14 +41,13 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
     try {
       await apiClient.post(`/portfolios/${formData.portfolioId}/transactions`, {
         instrument_key: selectedStock.instrument_key || selectedStock.isin,
-        instrument_name: selectedStock.name,
         transaction_type: formData.transactionType,
         quantity: parseFloat(formData.quantity),
         price: parseFloat(formData.price),
         brokerage: parseFloat(formData.brokerage),
         taxes: parseFloat(formData.taxes),
+        notes: formData.notes,
         transaction_date: formData.transactionDate,
-        notes: formData.notes
       })
       onSubmit()
     } catch (error) {
@@ -80,7 +79,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
             {portfolioIds.length > 1 && (
               <div>
                 <label className="text-sm font-medium">Portfolio</label>
-                <Select value={formData.portfolioId} onValueChange={(value) => setFormData({...formData, portfolioId: value})}>
+                <Select value={formData.portfolioId} onValueChange={(value) => setFormData({ ...formData, portfolioId: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -96,7 +95,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">Transaction Type</label>
-                <Select value={formData.transactionType} onValueChange={(value) => setFormData({...formData, transactionType: value})}>
+                <Select value={formData.transactionType} onValueChange={(value) => setFormData({ ...formData, transactionType: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -112,7 +111,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
                 <Input
                   type="date"
                   value={formData.transactionDate}
-                  onChange={(e) => setFormData({...formData, transactionDate: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, transactionDate: e.target.value })}
                   required
                 />
               </div>
@@ -126,7 +125,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
                   step="0.0001"
                   placeholder="0"
                   value={formData.quantity}
-                  onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   required
                 />
               </div>
@@ -138,7 +137,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
                   step="0.01"
                   placeholder="0.00"
                   value={formData.price}
-                  onChange={(e) => setFormData({...formData, price: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   required
                 />
               </div>
@@ -152,7 +151,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
                   step="0.01"
                   placeholder="0.00"
                   value={formData.brokerage}
-                  onChange={(e) => setFormData({...formData, brokerage: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, brokerage: e.target.value })}
                 />
               </div>
 
@@ -163,7 +162,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
                   step="0.01"
                   placeholder="0.00"
                   value={formData.taxes}
-                  onChange={(e) => setFormData({...formData, taxes: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, taxes: e.target.value })}
                 />
               </div>
             </div>
@@ -173,7 +172,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
               <Textarea
                 placeholder="Transaction notes (optional)"
                 value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               />
             </div>
 

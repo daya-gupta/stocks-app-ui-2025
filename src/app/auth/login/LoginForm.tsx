@@ -51,10 +51,10 @@ export function LoginForm() {
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
           <div className="space-y-2 text-center">
-            <Link href="/signup" className="block text-sm text-blue-600 hover:underline">
+            <Link href="/auth/signup" className="block text-sm text-blue-600 hover:underline">
               Don't have an account? Sign up
             </Link>
-            <Link href="/forgot-password" className="block text-sm text-blue-600 hover:underline">
+            <Link href="/auth/forgot-password" className="block text-sm text-blue-600 hover:underline">
               Forgot your password?
             </Link>
           </div>

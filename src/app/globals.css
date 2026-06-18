@@ -132,6 +132,10 @@ a {
   text-align: right;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .green {
   background-color: #70c970;
 }
@@ -156,7 +160,9 @@ a {
 .nav {
   flex-grow: 1;
   /* padding: 22px 22px 22px 50px; */
-  display: flex
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
 }
 
 .nav-item {
@@ -186,4 +192,8 @@ button.active {
 
 .chart-sma-options button {
   padding: 6px 10px;
+}
+
+.inline-block {
+  display: inline-block;
 }

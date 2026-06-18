@@ -1,8 +1,6 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
@@ -17,58 +15,74 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any | null>(null)
   const [loading, setLoading] = useState(true)
-  const [accessToken, setAccessToken] = useState<string | null>(null)
-  const supabase = createClient()
+  const [accessToken, setAccessToken] = useState<string | null>(typeof window !== 'undefined' ? localStorage.getItem('access_token') : null)
   const router = useRouter()
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user }, data: { session } } = await supabase.auth.getUser()
-      setUser(user)
-      setAccessToken(session?.access_token || null)
-      setLoading(false)
+    const parseJwt = (token: string) => {
+      try {
+        const base64Url = token.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c){
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+        }).join(''))
+        return JSON.parse(jsonPayload)
+      } catch (e) {
+        return null
+      }
     }
 
-    getUser()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null)
-        setAccessToken(session?.access_token || null)
-        setLoading(false)
-        
-        if (event === 'SIGNED_IN') {
-          router.push('/dashboard')
-        } else if (event === 'SIGNED_OUT') {
-          router.push('/auth/login')
+    const init = async () => {
+      const token = localStorage.getItem('access_token')
+      if (token) {
+        const decoded: any = parseJwt(token)
+        if (decoded) {
+          setUser({ id: decoded.user_id, email: decoded.email })
+          setAccessToken(token)
+        } else {
+          setUser(null)
+          setAccessToken(null)
         }
       }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth, router])
+      setLoading(false)
+    }
+    init()
+  }, [])
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    if (error) throw error
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/auth/signin`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.detail || 'Signin failed');
+    localStorage.setItem('access_token', data.access_token);
+    setAccessToken(data.access_token);
+    setUser({ id: data.user_id, email: data.email });
+    router.push('/dashboard')
   }
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
     })
-    if (error) throw error
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.detail || 'Signup failed')
+    // After signup, auto sign-in could be added; currently just set user minimal info
+    setUser({ id: data.user_id, email: data.email })
+    router.push('/auth/login')
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    localStorage.removeItem('access_token')
+    setAccessToken(null)
+    setUser(null)
+    router.push('/auth/login')
   }
 
   return (

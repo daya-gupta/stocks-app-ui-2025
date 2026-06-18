@@ -188,14 +188,14 @@ export const GLOBAL_LIST: GlobalListMap = {
     },
 };
 
-export const instruments = [
+export const modelInstruments = [
     "NSE_EQ|INE731H01025", //ACE
     "NSE_EQ|INE463V01026", // anand rathi
     "NSE_EQ|INE011E01029", // balu forge
     "NSE_EQ|INE00E101023", // bikaji
     "NSE_EQ|INE475E01026", //caplin-point
     "NSE_EQ|INE613B01010", // cdsl
-    "NSE_EQ|INE596I01012", //cams
+    // "NSE_EQ|INE596I01012", //cams
     "NSE_EQ|INE071N01016", // epigral
     "NSE_EQ|INE024L01027", // gravita
     "NSE_EQ|INE481N01025", //home first

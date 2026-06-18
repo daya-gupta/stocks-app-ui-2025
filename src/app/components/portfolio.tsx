@@ -3,14 +3,13 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { TableIcon, BarChartIcon } from "lucide-react"
 import { useEffect, useState } from "react";
-// import nseData from '../../../../../misc/NSE.json';
 import nseData from './../../../misc/NSE.json';
 import { FaChartLine } from "react-icons/fa6";
 import Link from "next/link";
 import moment from "moment";
 import { CandleType } from "../utils/types";
 import Sort from "../sort";
-import { apiClient } from "@/lib/api";
+import { modelInstruments } from "../utils/constants";
 
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}`;
 console.log(API_URL);
@@ -86,6 +85,7 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
             item.candles.unshift(iData[index].candles[0]);
         }
         console.log('array data', item.candles.slice(0, 3));
+        console.log(index);
         const price = item.candles[0][4];
         // const lastPrice = item.candles[1][4];
         const lastPrice = item.candles[getIndex(item.candles, 1, 'day')][4];
@@ -154,64 +154,18 @@ const formatData = (dData: [CandleResponseType], iData: [CandleResponseType]): {
     return { formattedData, averageReturns, benchmarkData };
 }
 
-// const formatIntradayData = (data) => {
-//     const formattedData = [];
-//     data.forEach((item) => {
-//         const instrumentDetails = GLOBAL_LIST[item.instrument] || {};
-//         const name = instrumentDetails.name || item.instrument;
-//         const price = item.candles[0][4];
-//         formattedData.push({
-//             instrument: item.instrument,
-//             name,
-//             price,
-//         });
-//     });
-//     return [formattedData];
-// }
-
-interface Watchlist {
-  id: string;
-  name: string;
-  instruments: string[];
-}
-
-const Portfolio = ({watchlistId}: {watchlistId: string}) => {
+const Portfolio = ({ watchlistId }: { watchlistId: string }) => {
     const [data, setData] = useState<Array<FormattedCandleType>>([]);
     const [averageReturns, setAverageReturns] = useState<averageReturnType>({ ...defaultAverageReturns });
     const [indexReturns, setIndexReturns] = useState<FormattedCandleType[]>([]);
-    const [watchlists, setWatchlists] = useState<Watchlist[]>([]);
-    const [selectedWatchlist, setSelectedWatchlist] = useState<string>('');
     const [view, setView] = useState<"table" | "chart">("table")
 
-    const fetchWatchlists = async () => {
-        try {
-            const data = await apiClient.get('/watchlists')
-            setWatchlists(data);
-            if (data.length > 0) {
-                setSelectedWatchlist(data[0].id);
-            }
-        } catch (error) {
-            console.error('Error fetching watchlists:', error);
-        }
-    };
-
     const fetchData = async () => {
-        if (!selectedWatchlist) return;
-        
-        // const currentWatchlist = watchlists.find(w => w.id === selectedWatchlist);
-        // if (!currentWatchlist) return;
 
-        // const fetchEntries = async () => {
-            // setLoading(true)
         let instruments: string[] = [];
-        try {
-            const data = await apiClient.get(`/watchlists/${selectedWatchlist}/entries`)
-            // setEntries(allEntries)
-            instruments = data.map((item: { instrument_key: string }) => item.instrument_key);
-        } catch (error) {
-            console.error('Error fetching entries:', error)
+        if (watchlistId && watchlistId === '1234') {
+            instruments = modelInstruments;
         }
-        //   }
 
         const deliveryPayload = {
             filter: {
@@ -264,14 +218,8 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
     }
 
     useEffect(() => {
-        fetchWatchlists();
+        fetchData();
     }, []);
-
-    useEffect(() => {
-        if (selectedWatchlist) {
-            fetchData();
-        }
-    }, [selectedWatchlist]);
 
     const getReturnStyles = (value: number) => {
         // tbd assign color codes based on relative values
@@ -327,17 +275,6 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">Model Portfolio - Growth 30</h1>
                 <div className="flex items-center gap-4">
-                    <select 
-                        value={selectedWatchlist}
-                        onChange={(e) => setSelectedWatchlist(e.target.value)}
-                        className="border rounded px-3 py-2"
-                    >
-                        {watchlists.map(watchlist => (
-                            <option key={watchlist.id} value={watchlist.id}>
-                                {watchlist.name}
-                            </option>
-                        ))}
-                    </select>
                     <ToggleGroup type="single" value={view} onValueChange={(v) => v && setView(v as "table" | "chart")}>
                         <ToggleGroupItem value="table" aria-label="Table view">
                             <TableIcon className="h-4 w-4" />
@@ -353,23 +290,6 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
                 <table>
                     <thead>
                         <tr>
-                            {/* <th>Name</th>
-                            <th className="numeric">
-                                Price
-                                <Sort sortOrder={sort.sortBy === 'price' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('price', sortOrder)} />
-                            </th>
-                            <th className="numeric">
-                                1 Day
-                                <Sort sortOrder={sort.sortBy === 'dayChange1' ? sort.sortOrder : 0} handleSortChange={(sortOrder) => handleSortChange('dayChange1', sortOrder)} />
-                            </th>
-                            <th className="numeric">1 Week</th>
-                            <th className="numeric">2 Week</th>
-                            <th className="numeric">1 Month</th>
-                            <th className="numeric">3 Month</th>
-                            <th className="numeric">6 Month</th>
-                            <th className="numeric">1 Year</th>
-                            <th className="numeric">2 Year</th>
-                            <th className="numeric">3 Year</th> */}
                             {
                                 headers.map(item => (
                                     <th className={item.className} key={item.key}>
@@ -386,11 +306,9 @@ const Portfolio = ({watchlistId}: {watchlistId: string}) => {
                                 <tr key={index}>
                                     <td>
                                         {item.name}
-                                        {/* <button onClick={() => openChart(item.instrument)}>Chart</button> */}
                                         <Link className="pull-right" href={`/chart/${item.instrument}`}>
                                             <FaChartLine title="Open Chart" />
                                         </Link>
-                                        {/* <button onClick={() => fetchIntradayData([item.instrument], '30minute')}>Intraday</button> */}
                                     </td>
                                     <td className="numeric">{item.price}</td>
                                     <td style={getReturnStyles(item.dayChange1)} className={`numeric`}>{item.dayChange1}%</td>

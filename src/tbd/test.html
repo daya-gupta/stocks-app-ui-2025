@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Loading</title>
+    <base href="/en-US/">
+
+    <style>
+        
+        
+        @tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+ 
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+ 
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+ 
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+ 
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+ 
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --ring: 0 0% 3.9%;
+ 
+    --radius: 0.5rem;
+ 
+    --chart-1: 12 76% 61%;
+ 
+    --chart-2: 173 58% 39%;
+ 
+    --chart-3: 197 37% 24%;
+ 
+    --chart-4: 43 74% 66%;
+ 
+    --chart-5: 27 87% 67%;
+  }
+ 
+  .dark {
+    --background: 0 0% 3.9%;
+    --foreground: 0 0% 98%;
+ 
+    --muted: 0 0% 14.9%;
+    --muted-foreground: 0 0% 63.9%;
+ 
+    --popover: 0 0% 3.9%;
+    --popover-foreground: 0 0% 98%;
+ 
+    --card: 0 0% 3.9%;
+    --card-foreground: 0 0% 98%;
+ 
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+ 
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 9%;
+ 
+    --secondary: 0 0% 14.9%;
+    --secondary-foreground: 0 0% 98%;
+ 
+    --accent: 0 0% 14.9%;
+    --accent-foreground: 0 0% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+ 
+    --ring: 0 0% 83.1%;
+ 
+    --chart-1: 220 70% 50%;
+ 
+    --chart-2: 160 60% 45%;
+ 
+    --chart-3: 30 80% 55%;
+ 
+    --chart-4: 280 65% 60%;
+ 
+    --chart-5: 340 75% 55%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  padding: 0.5rem;
+  text-align: left;
+  border: 1px solid #aaa;
+  &.numeric {
+    text-align: right;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+.pull-right {
+  float: right;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.green {
+  background-color: #70c970;
+}
+
+.red {
+  background-color: #f75353;
+}
+
+.header {
+  display: flex;
+  /* padding: 20px; */
+  font-weight: bold;
+  font-size: 20px;
+}
+
+.logo {
+  /* flex-basis: 180px; */
+  background: #52a9ff;
+  padding: 6px 20px;
+}
+
+.nav {
+  flex-grow: 1;
+  padding: 22px 22px 22px 50px;
+}
+
+.nav-item {
+  padding: 28px;
+}
+
+a.nav-item:hover {
+  opacity: .5;
+}
+
+.profile {
+  /* flex-basis: 100px; */
+  padding: 6px 20px;
+}
+
+button.active {
+  font-weight: bold;
+  background-color: #fff;
+}
+
+.chart-intervals button {
+  padding: 6px 10px;
+}
+
+.chart-sma-options button {
+  padding: 6px 10px;
+}
+
+
+    </style>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <!-- Chrome, Firefox OS and Opera -->
+    <meta name="theme-color" content="#1c1c1c">
+    <!-- Windows Phone -->
+    <meta name="msapplication-navbutton-color" content="#1c1c1c">
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="#1c1c1c">
+    <!-- Google Tag Manager -->
+    <script>
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MNXQ77K');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MNXQ77K" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <style>
+        @font-face {
+            font-family: Montserrat;
+            font-style: normal;
+            font-weight: 300;
+            src: local("Montserrat Light"), local("Montserrat-Light"), url(montserrat-v13-latin-300.169464b41fd5a6ed.woff2) format("woff2"), url(montserrat-v13-latin-300.4659e9ab4054a227.woff) format("woff")
+        }
+
+        @font-face {
+            font-family: Montserrat;
+            font-style: normal;
+            font-weight: 400;
+            src: local("Montserrat Regular"), local("Montserrat-Regular"), url(montserrat-v13-latin-regular.016fddc825bb37e6.woff2) format("woff2"), url(montserrat-v13-latin-regular.b9de6aa2f4bccfc5.woff) format("woff")
+        }
+
+        @font-face {
+            font-family: Montserrat;
+            font-style: normal;
+            font-weight: 500;
+            src: local("Montserrat Medium"), local("Montserrat-Medium"), url(montserrat-v13-latin-500.f4f8a034a65bf0eb.woff2) format("woff2"), url(montserrat-v13-latin-500.c03d339883f66523.woff) format("woff")
+        }
+
+        @font-face {
+            font-family: Montserrat;
+            font-style: normal;
+            font-weight: 600;
+            src: local("Montserrat SemiBold"), local("Montserrat-SemiBold"), url(montserrat-v13-latin-600.8f722b0683c9c276.woff2) format("woff2"), url(montserrat-v13-latin-600.be907d76f198fcee.woff) format("woff")
+        }
+
+        html {
+            height: 100%
+        }
+
+        body {
+            --primary-color: #34404f;
+            --primary-lighter-color: #677e9b;
+            --primary-darker-color: #1c1c1c;
+            --text-primary-color: white;
+            --text-primary-lighter-color: rgba(0, 0, 0, .87);
+            --text-primary-darker-color: white;
+            margin: 0;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: Roboto, sans-serif;
+            --accent-color: #68c184;
+            --accent-lighter-color: #edf8f0;
+            --accent-darker-color: #3a9e54;
+            --text-accent-color: white;
+            --text-accent-lighter-color: rgba(0, 0, 0, .87);
+            --text-accent-darker-color: white;
+            --warn-color: #f70b49;
+            --warn-lighter-color: #fb86a5;
+            --warn-darker-color: #97052b;
+            --text-warn-color: white;
+            --text-warn-lighter-color: rgba(0, 0, 0, .87);
+            --text-warn-darker-color: white;
+            --green-color: #68c184;
+            --green-alt-color: #649e80;
+            --dark-green-color: #076046;
+            --dark-green-alt-color: #118966;
+            --yellow-color: #ffbd00;
+            --orange-color: #f4a460;
+            --orange-alt-color: var(--yellow-color);
+            --purple-color: #a05ca5;
+            --purple-alt-color: #c49cc7;
+            --blue-color: #3875a6;
+            --blue-alt-color: #77afbc;
+            --black-color: #000000;
+            --gray-color: var(--neutral-color-one);
+            --white-color: #ffffff;
+            --light-gray-color: var(--neutral-color-six);
+            --neutral-color-one: #404040;
+            --neutral-color-two: #5f5f5f;
+            --neutral-color-three: #636a65;
+            --neutral-color-four: #8a938c;
+            --neutral-color-five: #b0b8b1;
+            --neutral-color-six: #e7e6e6;
+            --success-color: var(--green-color);
+            --warning-color: var(--yellow-color);
+            --error-color: #f70b49;
+            --info-color: var(--blue-alt-color);
+            --control-background-color: rgba(231, 241, 250, .5);
+            --disabled-state-color: #f4a460;
+            --application-background-color: #fafafa;
+            --readme-background: rgba(104, 193, 132, .22);
+            --readme-trigger-color: #86898a;
+            --logs-background: rgb(47, 79, 79);
+            --logs-text-color: #c4c4c4;
+            --table-background: #fafafa;
+            --border-table-color: rgba(0, 0, 0, .12);
+            --scrollbar-thumb: #9d9d9d;
+            --scrollbar-track: #e1e1e1;
+            --text-warn-yellow: var(--yellow-color);
+            --primary-color-purple: var(--purple-color);
+            --neutral-color: #f4a460;
+            --positive-color: #68c184;
+            --enabled-color: #68C184;
+            --disabled-color: #f4a460;
+            --clear-button-color: #34404f;
+            --clear-button-text-hover: var(--white-color);
+            --clear-button-disabled: rgba(0, 0, 0, .12);
+            --side-nav-expanded-color: rgb(66, 66, 66);
+            --sub-header-text-color: rgba(0, 0, 0, .54);
+            --group-header-text-color: #999;
+            --offline-color: #A9A9A9;
+            --login-title-color: white;
+            --border-color: rgba(0, 0, 0, .121);
+            --loading-text: #ffffff;
+            --license-bar-color: #ffffff;
+            --margin-top: 20px
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: Montserrat, sans-serif;
+            background-image: url(LoopEdge-Login-Background.c5ecb7b7fab1f806.jpg);
+            background-size: 0 0
+        }
+
+        @charset "UTF-8";
+
+        *,
+        :before,
+        :after {
+            box-sizing: border-box;
+            border-width: 0;
+            border-style: solid;
+            border-color: #e5e7eb
+        }
+
+        :before,
+        :after {
+            --tw-content: ""
+        }
+
+        html {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            -moz-tab-size: 4;
+            tab-size: 4;
+            font-family: Montserrat, sans-serif
+        }
+
+        body {
+            margin: 0;
+            line-height: inherit
+        }
+
+        img {
+            display: block;
+            vertical-align: middle
+        }
+
+        img {
+            max-width: 100%;
+            height: auto
+        }
+
+        *,
+        :before,
+        :after {
+            --tw-translate-x: 0;
+            --tw-translate-y: 0;
+            --tw-rotate: 0;
+            --tw-skew-x: 0;
+            --tw-skew-y: 0;
+            --tw-scale-x: 1;
+            --tw-scale-y: 1;
+            --tw-pan-x: ;
+            --tw-pan-y: ;
+            --tw-pinch-zoom: ;
+            --tw-scroll-snap-strictness: proximity;
+            --tw-ordinal: ;
+            --tw-slashed-zero: ;
+            --tw-numeric-figure: ;
+            --tw-numeric-spacing: ;
+            --tw-numeric-fraction: ;
+            --tw-ring-inset: ;
+            --tw-ring-offset-width: 0px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: rgb(59 130 246 / .5);
+            --tw-ring-offset-shadow: 0 0 #0000;
+            --tw-ring-shadow: 0 0 #0000;
+            --tw-shadow: 0 0 #0000;
+            --tw-shadow-colored: 0 0 #0000;
+            --tw-blur: ;
+            --tw-brightness: ;
+            --tw-contrast: ;
+            --tw-grayscale: ;
+            --tw-hue-rotate: ;
+            --tw-invert: ;
+            --tw-saturate: ;
+            --tw-sepia: ;
+            --tw-drop-shadow: ;
+            --tw-backdrop-blur: ;
+            --tw-backdrop-brightness: ;
+            --tw-backdrop-contrast: ;
+            --tw-backdrop-grayscale: ;
+            --tw-backdrop-hue-rotate: ;
+            --tw-backdrop-invert: ;
+            --tw-backdrop-opacity: ;
+            --tw-backdrop-saturate: ;
+            --tw-backdrop-sepia:
+        }
+
+        :root {
+            --ui-toolbar-height: 56px;
+            --ui-breadcrumbs-height: 32px;
+            --opcua-container-padding: 8px;
+            --opcua-filter-height: 74px;
+            --submenu-width: 135px;
+            --info-block-background: rgba(101, 68, 9, .09);
+            --card-height: 332px;
+            --twins-card-height: 196px;
+            --fallback-font-color: rgba(0, 0, 0, .5);
+            --warning-background: rgba(255, 189, 0, .15);
+            --device-logo-max-width: 128px;
+            --container-log-bg-color: #304f4f;
+            --white-color: #ffffff;
+            --twins-offset: 0px;
+            --pie-chart-light-green: #68c184;
+            --pie-chart-dark-green: #076046;
+            --pie-chart-yellow: #ffbd00;
+            --pie-chart-orange: #e8904c
+        }
+    </style>
+    <link rel="stylesheet" href="styles.9bd18f995f9d64bd.css" media="print" onload="this.media='all'"><noscript>
+        <link rel="stylesheet" href="styles.9bd18f995f9d64bd.css">
+    </noscript>
+</head>
+
+<body>
+    <app-root>
+        <style type="text/css">
+            #pre-bootstrap {
+                background-color: #FFFFFF;
+                bottom: 0px;
+                left: 0px;
+                position: fixed;
+                right: 0px;
+                top: 0px;
+                z-index: 999999;
+            }
+
+            #pre-bootstrap div.messaging {
+                font-family: Montserrat;
+                left: 0px;
+                margin-top: -37px;
+                position: absolute;
+                right: 0px;
+                text-align: center;
+                top: 50%;
+            }
+
+            #pre-bootstrap h1 {
+                font-size: 26px;
+                line-height: 35px;
+                margin: 0px 0px 20px 0px;
+            }
+
+            #pre-bootstrap p {
+                font-size: 18px;
+                line-height: 14px;
+                margin: 0px 0px 0px 0px;
+            }
+
+            #pre-bootstrap div.messaging>img {
+                margin: 0 auto;
+            }
+        </style>
+
+        <div id="pre-bootstrap">
+            <div class="messaging">
+
+                <img src="./assets/Rolling.svg" alt="">
+
+
+            </div>
+        </div>
+    </app-root>
+    <script src="runtime.657630076e5c7ce8.js" type="module"></script>
+    <script src="polyfills.9a18d75965a867db.js" type="module"></script>
+    <script src="scripts.f2536568c60a1388.js" defer></script>
+    <script src="vendor.8977a827be548d34.js" type="module"></script>
+    <script src="main.2fabc829e67e04d9.js" type="module"></script>
+
+
+</body>
+
+</html>
