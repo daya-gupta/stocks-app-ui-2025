@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Plus, TrendingUp, TrendingDown, DollarSign, PieChart } from 'lucide-react'
+import { Plus, TrendingUp, TrendingDown, DollarSign, PieChart, RefreshCw } from 'lucide-react'
 import PortfolioForm from '@/app/components/PortfolioForm'
 import TransactionForm from '@/app/components/TransactionForm'
 import PortfolioHoldings from '@/app/components/PortfolioHoldings'
@@ -29,7 +29,8 @@ const Portfolio = () => {
     totalValue: 0,
     totalInvested: 0,
     totalPnL: 0,
-    totalPnLPercentage: 0
+    totalPnLPercentage: 0,
+    holdingCount: 0
   })
 
   useEffect(() => {
@@ -58,24 +59,27 @@ const Portfolio = () => {
     try {
       let totalValue = 0
       let totalInvested = 0
-      
+      let holdingCount = 0
+
       for (const portfolioId of selectedPortfolios) {
         const holdings = await apiClient.get(`/portfolios/${portfolioId}/holdings`)
-        
+        holdingCount += holdings.length
+
         holdings.forEach((holding: any) => {
           totalValue += holding.current_value || 0
           totalInvested += holding.invested_value || 0
         })
       }
-      
+
       const totalPnL = totalValue - totalInvested
       const totalPnLPercentage = totalInvested > 0 ? (totalPnL / totalInvested) * 100 : 0
-      
+
       setPortfolioSummary({
         totalValue,
         totalInvested,
         totalPnL,
-        totalPnLPercentage
+        totalPnLPercentage,
+        holdingCount
       })
     } catch (error) {
       console.error('Error calculating portfolio summary:', error)
@@ -100,22 +104,19 @@ const Portfolio = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Portfolio Management</h1>
-          <p className="text-gray-600">Track your investments and performance</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowTransactionForm(true)} disabled={selectedPortfolios.length === 0}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Transaction
-          </Button>
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Portfolio
-          </Button>
-        </div>
+            
+      <div>
+        {/* <Button className="pull-right" variant="outline" size="sm" onClick={fetchPortfolios}>
+          <RefreshCw className="w-4 h-4 mr-1" />
+          Refresh
+        </Button> */}
+
+        <h1 className="text-xl font-bold">
+          <span>Portfolio Performance</span>
+          &nbsp;
+          <span className="text-lg text-gray-600">({portfolioSummary.holdingCount} stocks)</span>
+          {/* <span className="text-lg text-gray-600">Track your investments and performance</span> */}
+        </h1>
       </div>
 
       {/* Portfolio Summary Cards */}
@@ -129,7 +130,7 @@ const Portfolio = () => {
             <div className="text-2xl font-bold">₹{portfolioSummary.totalValue.toLocaleString()}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Invested Amount</CardTitle>
@@ -139,11 +140,11 @@ const Portfolio = () => {
             <div className="text-2xl font-bold">₹{portfolioSummary.totalInvested.toLocaleString()}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total P&L</CardTitle>
-            {portfolioSummary.totalPnL >= 0 ? 
+            {portfolioSummary.totalPnL >= 0 ?
               <TrendingUp className="h-4 w-4 text-green-600" /> :
               <TrendingDown className="h-4 w-4 text-red-600" />
             }
@@ -154,11 +155,11 @@ const Portfolio = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Returns %</CardTitle>
-            {portfolioSummary.totalPnLPercentage >= 0 ? 
+            {portfolioSummary.totalPnLPercentage >= 0 ?
               <TrendingUp className="h-4 w-4 text-green-600" /> :
               <TrendingDown className="h-4 w-4 text-red-600" />
             }
@@ -171,9 +172,8 @@ const Portfolio = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Portfolio Selection Sidebar */}
-        <div className="lg:col-span-1">
+      {/* Portfolio Selection Sidebar */}
+      {/* <div className="lg:col-span-1">
           <Card>
             <CardHeader>
               <CardTitle>My Portfolios</CardTitle>
@@ -200,9 +200,9 @@ const Portfolio = () => {
               ))}
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
-        {/* Main Content */}
+      {/* <div className="grid">
         <div className="lg:col-span-3">
           {selectedPortfolios.length > 0 ? (
             <Tabs defaultValue="holdings" className="w-full">
@@ -227,7 +227,9 @@ const Portfolio = () => {
             </Card>
           )}
         </div>
-      </div>
+      </div> */}
+
+      <PortfolioHoldings portfolioIds={selectedPortfolios} />
 
       {/* Forms */}
       {showCreateForm && (
@@ -247,6 +249,25 @@ const Portfolio = () => {
           onCancel={() => setShowTransactionForm(false)}
         />
       )}
+
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        {/* <div>
+          <h1 className="text-3xl font-bold">Portfolio Performance ({portfolioSummary.holdingCount} stocks)</h1>
+          <p className="text-gray-600">Track your investments and performance</p>
+        </div> */}
+        <div className="flex gap-2">
+          <Button onClick={() => setShowTransactionForm(true)} disabled={selectedPortfolios.length === 0}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Transaction
+          </Button>
+          <Button onClick={() => setShowCreateForm(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Portfolio
+          </Button>
+        </div>
+      </div>
+
     </div>
   );
 }

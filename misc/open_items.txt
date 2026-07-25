@@ -1,0 +1,31 @@
+"stock search not working with mouse click",
+"Clean environment variables",
+"Fix login flow",
+"Fix model portfolio",
+"Commit the code",
+"Update JIRA",
+"-Why do I need to get the token every time? What is solution?",
+"Stock search is super slow",
+"Tag is having curly brace",
+"error handling for db error"
+
+// await db_log_watchlist_action(conn, new_watchlist['id'], 'created')
+// instrument.json vs nse.json vs nse_mini.json
+// externalize and centralize the db connection
+
+
+30  fix chart on home page
+60  have basic model portfolio page
+60  have basic portfolio commentry page
+30  youtube vidoes in db
+30  read stocks list from db (for search)
+
+60  organized watchlist page
+120  styles fix for mobile view
+120  vm setup
+120  install dependencies
+180  deploy initial version of application
+
+
+*commit the code
+*python code separation as per module

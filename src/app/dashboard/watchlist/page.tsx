@@ -24,7 +24,6 @@ export default function WatchlistPage() {
 
       <div className="pt-4">
         <WatchlistEntries watchlistIds={selectedWatchlists} />
-
       </div>
     </div>
   )

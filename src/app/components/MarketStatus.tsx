@@ -57,7 +57,7 @@ export default function MarketStatus() {
             <StockPrice instrumentKey="NSE_INDEX|Nifty 50" />
             <div className="text-center">
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: statusColor }}></span>
-                <span className="text-sm font-medium inline-block" style={{ color: statusColor }}>{status.status.replace('_', ' ')}</span>
+                <span className="text-sm font-medium inline-block" style={{ color: statusColor }}>MARKET {status.status.replace('_', ' ')}</span>
             </div>
         </div>
     );

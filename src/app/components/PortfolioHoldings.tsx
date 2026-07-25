@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import { apiClient } from '@/lib/api'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Sort from '../sort'
 
 interface Holding {
   id: string
   instrument_key: string
-  instrument_name?: string
+  trading_symbol?: string
+  company_name?: string
   quantity: number
   average_cost: number
-  invested_value?: number
   current_price?: number
+  invested_value?: number
   current_value?: number
   pnl?: number
   pnl_percentage?: number
@@ -24,9 +25,17 @@ interface PortfolioHoldingsProps {
   portfolioIds: string[]
 }
 
+type SortKey = 'trading_symbol' | 'current_price' | 'quantity' | 'average_cost' | 'invested_value' | 'current_value' | 'pnl' | 'pnl_percentage'
+
+interface SortState {
+  key: SortKey | null
+  order: 1 | -1
+}
+
 export default function PortfolioHoldings({ portfolioIds }: PortfolioHoldingsProps) {
   const [holdings, setHoldings] = useState<Holding[]>([])
   const [loading, setLoading] = useState(false)
+  const [sort, setSort] = useState<SortState>({ key: null, order: 1 })
 
   useEffect(() => {
     if (portfolioIds.length > 0) {
@@ -34,87 +43,15 @@ export default function PortfolioHoldings({ portfolioIds }: PortfolioHoldingsPro
     }
   }, [portfolioIds])
 
-  // Helper function to fetch market data for an instrument
-  const fetchMarketData = async (instrumentKey: string) => {
-    try {
-      // Call the backend holdings endpoint which should enrich with market data
-      // If that fails, this would be where you'd call a market endpoint
-      const response = await apiClient.get(`/market-price?instrument_key=${instrumentKey}`);
-      return response?.data?.last_price || 0;
-    } catch (error) {
-      console.warn(`Could not fetch market data for ${instrumentKey}, using 0:`, error);
-      return 0; // Fallback to 0 if market data unavailable
-    }
-  };
-
-  // Helper function to extract or fetch instrument name
-  const getInstrumentName = (instrumentKey: string) => {
-    // Parse instrument_key format: NSE_EQ|INE01IU01018
-    // Try to extract meaningful part or use as-is
-    if (instrumentKey.includes('|')) {
-      const parts = instrumentKey.split('|');
-      return parts[parts.length - 1]; // Return the last part (usually the symbol)
-    }
-    return instrumentKey;
-  };
-
-  const enrichHoldingWithMarketData = async (holding: any): Promise<Holding> => {
-    try {
-      // Fetch current market price
-      const currentPrice = await fetchMarketData(holding.instrument_key);
-      
-      // Calculate values
-      const invested = holding.quantity * holding.average_cost;
-      const current = holding.quantity * currentPrice;
-      const pnl = current - invested;
-      const pnlPercentage = invested > 0 ? (pnl / invested) * 100 : 0;
-
-      return {
-        id: holding.id,
-        instrument_key: holding.instrument_key,
-        instrument_name: getInstrumentName(holding.instrument_key),
-        quantity: holding.quantity,
-        average_cost: holding.average_cost,
-        invested_value: invested,
-        current_price: currentPrice,
-        current_value: current,
-        pnl: pnl,
-        pnl_percentage: pnlPercentage,
-      };
-    } catch (error) {
-      console.error(`Error enriching holding ${holding.instrument_key}:`, error);
-      // Return holding with safe defaults
-      const invested = holding.quantity * holding.average_cost;
-      return {
-        id: holding.id,
-        instrument_key: holding.instrument_key,
-        instrument_name: getInstrumentName(holding.instrument_key),
-        quantity: holding.quantity,
-        average_cost: holding.average_cost,
-        invested_value: invested,
-        current_price: 0,
-        current_value: 0,
-        pnl: 0,
-        pnl_percentage: 0,
-      };
-    }
-  };
-
   const fetchHoldings = async () => {
     setLoading(true)
     try {
       const allHoldings: Holding[] = []
       
       for (const portfolioId of portfolioIds) {
-        // Fetch holdings from API
+        // Fetch holdings - backend now returns enriched data with current prices and P&L
         const holdingsData = await apiClient.get(`/portfolios/${portfolioId}/holdings`);
-        
-        // Enrich each holding with market data in parallel
-        const enrichedHoldings = await Promise.all(
-          holdingsData.map((holding: any) => enrichHoldingWithMarketData(holding))
-        );
-        
-        allHoldings.push(...enrichedHoldings);
+        allHoldings.push(...holdingsData);
       }
       
       setHoldings(allHoldings)
@@ -124,6 +61,45 @@ export default function PortfolioHoldings({ portfolioIds }: PortfolioHoldingsPro
       setLoading(false)
     }
   }
+
+  const handleSort = (key: SortKey) => {
+    let newOrder: 1 | -1 = 1
+    if (sort.key === key && sort.order === 1) {
+      newOrder = -1
+    }
+    setSort({ key, order: newOrder })
+
+    const sortedHoldings = [...holdings].sort((a, b) => {
+      let aVal: any = a[key]
+      let bVal: any = b[key]
+
+      if (key === 'trading_symbol') {
+        return newOrder === 1 
+          ? (aVal || '').localeCompare(bVal || '')
+          : (bVal || '').localeCompare(aVal || '')
+      }
+
+      aVal = parseFloat(aVal) || 0
+      bVal = parseFloat(bVal) || 0
+
+      return newOrder === 1 ? aVal - bVal : bVal - aVal
+    })
+
+    setHoldings(sortedHoldings)
+  }
+
+  const calculateTotals = () => {
+    return {
+      quantity: holdings.reduce((sum, h) => sum + (h.quantity || 0), 0),
+      invested_value: holdings.reduce((sum, h) => sum + (h.invested_value || 0), 0),
+      current_value: holdings.reduce((sum, h) => sum + (h.current_value || 0), 0),
+      pnl: holdings.reduce((sum, h) => sum + (h.pnl || 0), 0),
+      pnl_percentage: holdings.length > 0 
+        ? (holdings.reduce((sum, h) => sum + (h.pnl || 0), 0) / holdings.reduce((sum, h) => sum + (h.invested_value || 0), 0)) * 100
+        : 0
+    }
+  }
+
 
   if (loading) {
     return (
@@ -148,66 +124,98 @@ export default function PortfolioHoldings({ portfolioIds }: PortfolioHoldingsPro
     )
   }
 
+  const totals = calculateTotals()
+  const totalPnlColor = totals.pnl >= 0 ? 'text-green-600' : 'text-red-600'
+
+  const columnHeaders = [
+    { key: 'trading_symbol', label: 'Stock', sortable: true },
+    { key: 'current_price', label: 'Price', sortable: true, align: 'right' },
+    { key: 'quantity', label: 'Quantity', sortable: true, align: 'right' },
+    { key: 'average_cost', label: 'Avg Price', sortable: true, align: 'right' },
+    { key: 'invested_value', label: 'Invested', sortable: true, align: 'right' },
+    { key: 'current_value', label: 'Current Value', sortable: true, align: 'right' },
+    { key: 'pnl', label: 'P&L', sortable: true, align: 'right' },
+    { key: 'pnl_percentage', label: 'Return %', sortable: true, align: 'right' },
+  ]
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Holdings ({holdings.length})</h3>
-        <Button variant="outline" size="sm" onClick={fetchHoldings}>
-          <RefreshCw className="w-4 h-4 mr-1" />
-          Refresh
-        </Button>
-      </div>
-
-      <div className="grid gap-4">
-        {holdings.map((holding) => (
-          <Card key={holding.id}>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <h4 className="font-medium text-sm text-gray-600">Stock</h4>
-                  <p className="font-semibold">{holding.instrument_name}</p>
-                  <p className="text-xs text-gray-500">{holding.instrument_key}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-sm text-gray-600">Quantity & Avg Price</h4>
-                  <p className="font-semibold">{holding.quantity.toLocaleString()}</p>
-                  <p className="text-sm text-gray-500">@ ₹{holding.average_cost.toFixed(2)}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-sm text-gray-600">Investment & Current</h4>
-                  <p className="font-semibold">₹{(holding.invested_value || 0).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0})}</p>
-                  <p className="text-sm text-gray-500">
-                    Current: ₹{(holding.current_value || 0).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-end">
-                  <div className={`flex items-center ${
-                    (holding.pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {(holding.pnl || 0) >= 0 ? 
-                      <TrendingUp className="w-4 h-4 mr-1" /> : 
-                      <TrendingDown className="w-4 h-4 mr-1" />
-                    }
-                    <span className="font-semibold">
-                      ₹{Math.abs(holding.pnl || 0).toLocaleString('en-IN', {minimumFractionDigits: 0, maximumFractionDigits: 0})}
-                    </span>
+      <div className="overflow-x-auto border rounded-lg">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100 border-b">
+            <tr>
+              {columnHeaders.map((header) => (
+                <th 
+                  key={header.key} 
+                  className={`px-4 py-3 text-left font-semibold text-sm ${header.align === 'right' ? 'text-right' : ''}`}
+                >
+                  <div className="flex items-center justify-between cursor-pointer group">
+                    <span>{header.label}</span>
+                    {header.sortable && (
+                      <span onClick={() => handleSort(header.key as SortKey)} className="ml-2">
+                        <Sort 
+                          sortOrder={sort.key === header.key ? sort.order : 0} 
+                          handleSortChange={(order) => handleSort(header.key as SortKey)} 
+                        />
+                      </span>
+                    )}
                   </div>
-                  <Badge 
-                    variant="secondary" 
-                    className={`mt-1 ${
-                      (holding.pnl_percentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
-                    {(holding.pnl_percentage || 0).toFixed(2)}%
-                  </Badge>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {holdings.map((holding, index) => (
+              <tr key={holding.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <td className="px-4 py-3">
+                  <div>
+                    <p className="font-semibold text-sm">{holding.trading_symbol || holding.instrument_key}</p>
+                    <p className="text-xs text-gray-500">{holding.company_name}</p>
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-right text-sm">₹{(holding.current_price || 0).toFixed(2)}</td>
+                <td className="px-4 py-3 text-right text-sm">{holding.quantity.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                <td className="px-4 py-3 text-right text-sm">₹{holding.average_cost.toFixed(2)}</td>
+                <td className="px-4 py-3 text-right text-sm font-medium">₹{(holding.invested_value || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                <td className="px-4 py-3 text-right text-sm font-medium">₹{(holding.current_value || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+                <td className={`px-4 py-3 text-right text-sm font-semibold ${(holding.pnl || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className="flex items-center justify-end gap-1">
+                    {(holding.pnl || 0) >= 0 ? 
+                      <TrendingUp className="w-4 h-4" /> : 
+                      <TrendingDown className="w-4 h-4" />
+                    }
+                    ₹{Math.abs(holding.pnl || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                  </div>
+                </td>
+                <td className={`px-4 py-3 text-right text-sm font-semibold ${(holding.pnl_percentage || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {(holding.pnl_percentage || 0).toFixed(2)}%
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot className="bg-gray-200 border-t-2 border-gray-300 font-bold">
+            <tr>
+              <td className="px-4 py-3 text-sm">Total</td>
+              <td className="px-4 py-3 text-right text-sm">-</td>
+              <td className="px-4 py-3 text-right text-sm">{totals.quantity.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+              <td className="px-4 py-3 text-right text-sm">-</td>
+              <td className="px-4 py-3 text-right text-sm">₹{totals.invested_value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+              <td className="px-4 py-3 text-right text-sm">₹{totals.current_value.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</td>
+              <td className={`px-4 py-3 text-right text-sm ${totalPnlColor}`}>
+                <div className="flex items-center justify-end gap-1">
+                  {totals.pnl >= 0 ? 
+                    <TrendingUp className="w-4 h-4" /> : 
+                    <TrendingDown className="w-4 h-4" />
+                  }
+                  ₹{Math.abs(totals.pnl).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </td>
+              <td className={`px-4 py-3 text-right text-sm ${totalPnlColor}`}>
+                {totals.pnl_percentage.toFixed(2)}%
+              </td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   )

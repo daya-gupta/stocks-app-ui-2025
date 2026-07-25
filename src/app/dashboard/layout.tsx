@@ -13,7 +13,7 @@ export default function DashboardLayout({
     return (
         <div>
             <Banner />
-            <div style={{ margin: '16px 5%', width: '90%' }}>
+            <div>
                 {children}
             </div>
         </div>

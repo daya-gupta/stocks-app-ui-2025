@@ -19,8 +19,9 @@ export default function Banner() {
                 <div>
                     {/* <Link className="nav-item" href='/dashboard/chart/NSE_INDEX%7CNifty%2050'>Home</Link>                 */}
                     <Link className="nav-item" href='/dashboard'>Home</Link>
+                    {/* <Link className="nav-item" href='/dashboard/old-portfolio'>Old Portfolios</Link> */}
                     <Link className="nav-item" href='/dashboard/model-portfolio'>Model Portfolios</Link>
-                    <Link className="nav-item" href='/dashboard/portfolio-commentry'>Portfolio Commentry</Link>
+                    <Link className="nav-item" href='/dashboard/portfolio-commentary'>Portfolio Commentary</Link>
                     <Link className="nav-item" href='/dashboard/watchlist'>Watchlist</Link>
                     <Link className="nav-item" href='/dashboard/youtube-video'>YouTube Videos</Link>
                     {/* <Link className="nav-item" href='/dashboard/holidays'>Market Holidays</Link>                 */}

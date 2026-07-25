@@ -69,7 +69,7 @@ export default function TransactionForm({ portfolioIds, onSubmit, onCancel }: Tr
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium">Select Stock</label>
+              <label className="text-sm font-medium">Stock Name:</label>
               <AutoCompletex onSelect={setSelectedStock} />
               {selectedStock && (
                 <p className="text-sm text-gray-600 mt-1">Selected: {selectedStock.name}</p>
