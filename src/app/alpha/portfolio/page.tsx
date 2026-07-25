@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import { apiClient } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// import { Badge } from '@/components/ui/badge'
 import { Plus, TrendingUp, TrendingDown, DollarSign, PieChart, RefreshCw } from 'lucide-react'
 import PortfolioForm from '@/app/components/PortfolioForm'
 import TransactionForm from '@/app/components/TransactionForm'
 import PortfolioHoldings from '@/app/components/PortfolioHoldings'
-import PortfolioTransactions from '@/app/components/PortfolioTransactions'
+// import PortfolioTransactions from '@/app/components/PortfolioTransactions'
 
 interface Portfolio {
   id: string
@@ -96,11 +96,11 @@ const Portfolio = () => {
     }
   }
 
-  const togglePortfolioSelection = (id: string) => {
-    setSelectedPortfolios(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    )
-  }
+  // const togglePortfolioSelection = (id: string) => {
+  //   setSelectedPortfolios(prev =>
+  //     prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
+  //   )
+  // }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

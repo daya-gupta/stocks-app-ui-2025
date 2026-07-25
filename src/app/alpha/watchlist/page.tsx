@@ -19,9 +19,11 @@ interface Watchlist {
   created_at: string
 }
 
+const publicWatchlistId = 'd6db4fd1-3b3c-4c9e-b64b-b3b360210a1f';
+
 export default function WatchlistPage() {
   const [watchlists, setWatchlists] = useState<Watchlist[]>([])
-  const [selectedWatchlists, setSelectedWatchlist] = useState<string[]>([])
+  const [selectedWatchlists, setSelectedWatchlist] = useState<string[]>([publicWatchlistId])
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [editingWatchlist, setEditingWatchlist] = useState<Watchlist | null>(null)
 
@@ -33,7 +35,7 @@ export default function WatchlistPage() {
     try {
       const data = await apiClient.get('/watchlists')
       setWatchlists(data)
-      if (data.length > 0) {
+      if (data.length > 0 && selectedWatchlists.length === 0) {
         setSelectedWatchlist([data[0].id])
       }
     } catch (error) {
@@ -83,8 +85,7 @@ export default function WatchlistPage() {
                   if (!selectedWatchlists.includes(watchlist.id)) {
                     setSelectedWatchlist([watchlist.id])
                   }
-                }
-                }
+                }}
               >
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">

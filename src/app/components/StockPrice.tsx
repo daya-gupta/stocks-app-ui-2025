@@ -30,9 +30,9 @@ export default function StockPrice({ instrumentKey }: StockPriceProps) {
         };
 
         fetchLTP();
-        const interval = setInterval(fetchLTP, 60000); // Update every 5 seconds
+        // const interval = setInterval(fetchLTP, 60000); // Update every minute
 
-        return () => clearInterval(interval);
+        // return () => clearInterval(interval);
     }, [instrumentKey]);
 
     if (!priceData) return null;
