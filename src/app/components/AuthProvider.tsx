@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface AuthContextType {
-  user: User | null
+  user: any
   loading: boolean
   accessToken: string | null
   signIn: (email: string, password: string) => Promise<void>

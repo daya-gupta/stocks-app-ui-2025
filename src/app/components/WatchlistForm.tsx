@@ -24,7 +24,7 @@ export default function WatchlistForm({ watchlist, onSubmit, onCancel }: Watchli
     e.preventDefault()
     onSubmit({
       ...formData,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean)
+      tags: formData.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
     })
   }
 

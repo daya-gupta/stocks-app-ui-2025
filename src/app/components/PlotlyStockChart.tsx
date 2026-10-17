@@ -1,15 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
+// import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // import { apiClient } from '@/lib/api'
 import { Download, TrendingUp, BarChart3, Activity } from 'lucide-react'
-
-// Dynamic import to avoid SSR issues with Plotly
-const Plot = dynamic(() => import('react-plotly.js'), { ssr: false })
 
 interface PlotlyStockChartProps {
   instrumentKey: string
@@ -333,14 +330,14 @@ export default function PlotlyStockChart({ instrumentKey, instrumentName }: Plot
             </div>
           )}
           
-          {chartData && (
+          {/* {chartData && (
             <Plot
               data={createPlotData()}
               layout={getLayout()}
               config={getConfig()}
               style={{ width: '100%', height: '600px' }}
             />
-          )}
+          )} */}
         </div>
       </CardContent>
     </Card>

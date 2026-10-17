@@ -1,7 +1,8 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
-import { createChart, CandlestickSeries, HistogramSeries, LineSeries, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
+// import { createChart, CandlestickSeries, HistogramSeries, LineSeries, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
+import { createChart, ISeriesApi, Time, WhitespaceData } from 'lightweight-charts';
 import { GLOBAL_LIST, intervalOptions, smaOptions } from "@/app/utils/constants";
 import { sma } from 'indicatorts';
 import moment from "moment";
@@ -166,10 +167,11 @@ const Chart = () => {
     useEffect(() => {
         const container = chartRef.current as HTMLElement;
         const chart = createChart(container, chartProperties);
-        // const priceSeries = chart.addCandlestickSeries({});
-        const priceSeries: ChartPriceSeries = chart.addSeries(CandlestickSeries);
+        const priceSeries = chart.addCandlestickSeries({});
+        // const priceSeries: ChartPriceSeries = chart.addSeries(CandlestickSeries);
         // const priceSeries: ChartSeries<"Candlestick"> = chart.addSeries(CandlestickSeries);
-        const volumeSeries: ChartVolumeSeries = chart.addSeries(HistogramSeries, {
+        // const volumeSeries: ChartVolumeSeries = chart.addSeries(HistogramSeries, {
+        const volumeSeries: ChartVolumeSeries = chart.addHistogramSeries({
             priceFormat: {
                 type: 'volume',
             },
@@ -180,7 +182,8 @@ const Chart = () => {
             // height: 50
         });
 
-        const smaSeries: ChartSmaSeries = chart.addSeries(LineSeries, {
+        // const smaSeries: ChartSmaSeries = chart.addSeries(LineSeries, {
+        const smaSeries: ChartSmaSeries = chart.addLineSeries({
             // priceFormat: {
             //     type: 'volume',
             // },

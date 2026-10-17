@@ -5,6 +5,7 @@ import { apiClient } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { createChart } from "lightweight-charts";
 
 interface StockChartProps {
   instrumentKey: string
@@ -48,7 +49,6 @@ export default function StockChart({ instrumentKey, instrumentName }: StockChart
 
     const initChart = async () => {
       try {
-        const { createChart } = await import('lightweight-charts')
         
         if (!isMounted || !chartContainerRef.current) return
 
