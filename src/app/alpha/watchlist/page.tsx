@@ -19,7 +19,8 @@ interface Watchlist {
   created_at: string
 }
 
-const publicWatchlistId = 'd6db4fd1-3b3c-4c9e-b64b-b3b360210a1f';
+// const publicWatchlistId = 'd6db4fd1-3b3c-4c9e-b64b-b3b360210a1f'; // stocks
+const publicWatchlistId = 'e7151eff-be7f-4db5-a253-33be77eebba4'; // test_connectivity
 
 export default function WatchlistPage() {
   const [watchlists, setWatchlists] = useState<Watchlist[]>([])
