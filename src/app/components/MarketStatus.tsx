@@ -13,6 +13,7 @@ export default function MarketStatus() {
     const [status, setStatus] = useState<MarketStatusData | null>(null);
 
     useEffect(() => {
+        console.log('Fetching market status...', process.env.NEXT_PUBLIC_API_URL);
         const fetchStatus = async () => {
             try {
                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/marketStatus`);

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
+// import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,23 +11,23 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
-  const supabase = createClient()
+  // const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
-      })
-      if (error) throw error
-      setSent(true)
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'An error occurred')
-    } finally {
-      setLoading(false)
-    }
+    // try {
+    //   const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    //     redirectTo: `${window.location.origin}/reset-password`
+    //   })
+    //   if (error) throw error
+    //   setSent(true)
+    // } catch (error) {
+    //   alert(error instanceof Error ? error.message : 'An error occurred')
+    // } finally {
+    //   setLoading(false)
+    // }
   }
 
   if (sent) {
